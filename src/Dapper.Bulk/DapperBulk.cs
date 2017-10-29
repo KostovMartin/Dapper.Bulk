@@ -2,21 +2,57 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Data;
+using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 
 namespace Dapper.Bulk
 {
-    internal static class Cache
+    public static class DapperBulk
     {
-        private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> TypeTableName = new ConcurrentDictionary<RuntimeTypeHandle, string>();
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> TableNames = new ConcurrentDictionary<RuntimeTypeHandle, string>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> KeyProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypeProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> ComputedProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
+        private static readonly IBulkInsert BulkInsertSqlServer = new BulkInsertSqlServer();
 
-        public static string GetTableName(Type type)
+        public static IEnumerable<T> BulkInsert<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
         {
-            if (TypeTableName.TryGetValue(type.TypeHandle, out string name))
+            var adapter = GetDbAdapter(connection);
+            var type = typeof(T);
+            var tableName = GetTableName(type);
+            var allProperties = TypePropertiesCache(type);
+            var keyProperties = KeyPropertiesCache(type);
+            var computedProperties = ComputedPropertiesCache(type);
+            return adapter.BulkInsert(connection, data, tableName, allProperties, keyProperties, computedProperties, transaction);  
+        }
+
+        public static Task<IEnumerable<T>> BulkInsertAsync<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
+        {
+            var inserter = GetDbAdapter(connection);
+            var type = typeof(T);
+            var tableName = GetTableName(type);
+            var allProperties = TypePropertiesCache(type);
+            var keyProperties = KeyPropertiesCache(type);
+            var computedProperties = ComputedPropertiesCache(type);
+            return inserter.BulkInsertAsync(connection, data, tableName, allProperties, keyProperties, computedProperties, transaction);
+        }
+
+        private static IBulkInsert GetDbAdapter(IDbConnection connection)
+        {
+            if (connection is SqlConnection)
+            {
+                return BulkInsertSqlServer;
+            }
+
+            throw new NotSupportedException();
+        }
+
+        private static string GetTableName(Type type)
+        {
+            if (TableNames.TryGetValue(type.TypeHandle, out string name))
             {
                 return name;
             }
@@ -31,14 +67,16 @@ namespace Dapper.Bulk
             {
                 name = type.Name + "s";
                 if (type.IsInterface && name.StartsWith("I"))
+                {
                     name = name.Substring(1);
+                }
             }
 
-            TypeTableName[type.TypeHandle] = name;
+            TableNames[type.TypeHandle] = name;
             return name;
         }
 
-        public static List<PropertyInfo> TypePropertiesCache(Type type)
+        private static List<PropertyInfo> TypePropertiesCache(Type type)
         {
             if (TypeProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pis))
             {
@@ -49,8 +87,8 @@ namespace Dapper.Bulk
             TypeProperties[type.TypeHandle] = properties;
             return properties.ToList();
         }
-        
-        public static List<PropertyInfo> KeyPropertiesCache(Type type)
+
+        private static List<PropertyInfo> KeyPropertiesCache(Type type)
         {
             if (KeyProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pi))
             {
@@ -73,7 +111,7 @@ namespace Dapper.Bulk
             return keyProperties;
         }
 
-        public static List<PropertyInfo> ComputedPropertiesCache(Type type)
+        private static List<PropertyInfo> ComputedPropertiesCache(Type type)
         {
             if (ComputedProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pi))
             {

@@ -8,15 +8,17 @@ using System.Threading.Tasks;
 
 namespace Dapper.Bulk
 {
-    public static partial class DapperBulkSqlServer
+    internal class BulkInsertSqlServer : IBulkInsert
     {
-        public static IEnumerable<T> BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
+        public IEnumerable<T> BulkInsert<T>(
+            IDbConnection connection, 
+            IEnumerable<T> data, 
+            string tableName, 
+            IList<PropertyInfo> allProperties,
+            IList<PropertyInfo> keyProperties,
+            IList<PropertyInfo> computedProperties,
+            IDbTransaction transaction)
         {
-            var type = typeof(T);
-            var tableName = Cache.GetTableName(type);
-            var allProperties = Cache.TypePropertiesCache(type);
-            var keyProperties = Cache.KeyPropertiesCache(type);
-            var computedProperties = Cache.ComputedPropertiesCache(type);
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
             var keyPropertiesString = GetColumnsStringSqlServer(keyProperties);
@@ -32,7 +34,7 @@ namespace Dapper.Bulk
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                bulkCopy.WriteToServer(data.ToDataTable().CreateDataReader());
+                bulkCopy.WriteToServer(ToDataTable(data).CreateDataReader());
             }
 
             if (keyProperties.Count == 0)
@@ -67,16 +69,19 @@ namespace Dapper.Bulk
                 SELECT {allPropertiesString}
                 FROM {tableName} target INNER JOIN {tempInsertedWithIdentity} ins ON {joinOn}
 
-                DROP TABLE {tempToBeInserted};", null, transaction);    
+                DROP TABLE {tempToBeInserted};", null, transaction);
         }
 
-        public static async Task<IEnumerable<T>> BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
+
+        public async Task<IEnumerable<T>> BulkInsertAsync<T>(
+            IDbConnection connection,
+            IEnumerable<T> data,
+            string tableName,
+            IList<PropertyInfo> allProperties,
+            IList<PropertyInfo> keyProperties,
+            IList<PropertyInfo> computedProperties,
+            IDbTransaction transaction)
         {
-            var type = typeof(T);
-            var tableName = Cache.GetTableName(type);
-            var allProperties = Cache.TypePropertiesCache(type);
-            var keyProperties = Cache.KeyPropertiesCache(type);
-            var computedProperties = Cache.ComputedPropertiesCache(type);
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
             var keyPropertiesString = GetColumnsStringSqlServer(keyProperties);
@@ -92,7 +97,7 @@ namespace Dapper.Bulk
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                await bulkCopy.WriteToServerAsync(data.ToDataTable().CreateDataReader());
+                await bulkCopy.WriteToServerAsync(ToDataTable(data).CreateDataReader());
             }
 
             if (keyProperties.Count == 0)
@@ -136,8 +141,8 @@ namespace Dapper.Bulk
         {
             return string.Join(", ", properties.Select(property => $"{tablePrefix}[{property.Name}]"));
         }
-        
-        private static DataTable ToDataTable<T>(this IEnumerable<T> data)
+
+        private static DataTable ToDataTable<T>(IEnumerable<T> data)
         {
             var dataTable = new DataTable(typeof(T).Name);
             var Props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
