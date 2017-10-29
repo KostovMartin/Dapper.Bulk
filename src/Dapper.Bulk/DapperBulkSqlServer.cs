@@ -57,6 +57,7 @@ namespace Dapper.Bulk
             }
 
             var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
+            var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
             return connection.Query<T>($@"
                 DECLARE {tempInsertedWithIdentity} TABLE ({table})
                 INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
@@ -64,7 +65,7 @@ namespace Dapper.Bulk
                 SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
 
                 SELECT {allPropertiesString}
-                FROM {tableName} target INNER JOIN {tempInsertedWithIdentity} ins ON target.id = ins.id
+                FROM {tableName} target INNER JOIN {tempInsertedWithIdentity} ins ON {joinOn}
 
                 DROP TABLE {tempToBeInserted};", null, transaction);    
         }
@@ -116,6 +117,7 @@ namespace Dapper.Bulk
             }
 
             var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
+            var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
             var reader = await connection.QueryAsync<T>($@"
                 DECLARE {tempInsertedWithIdentity} TABLE ({table})
                 INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
@@ -123,7 +125,7 @@ namespace Dapper.Bulk
                 SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
 
                 SELECT {allPropertiesString}
-                FROM {tableName} target INNER JOIN {tempInsertedWithIdentity} ins ON target.id = ins.id
+                FROM {tableName} target INNER JOIN {tempInsertedWithIdentity} ins ON {joinOn}
 
                 DROP TABLE {tempToBeInserted};", null, transaction);
 
