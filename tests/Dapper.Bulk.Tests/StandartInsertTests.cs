@@ -35,7 +35,7 @@ namespace Dapper.Bulk.Tests
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
-                var inserted = connection.BulkInsert(data);
+                var inserted = connection.BulkInsert(data).ToList();
                 for (int i = 0; i < inserted.Count; i++)
                 {
                     IsValidInsert(inserted[i], data[i]);

@@ -9,7 +9,7 @@ namespace Dapper.Bulk
 {
     public static partial class DapperBulk
     {
-        public static IList<T> BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
+        public static IEnumerable<T> BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
         {
             var type = typeof(T);
             var tableName = Cache.GetTableName(type);
@@ -45,10 +45,10 @@ namespace Dapper.Bulk
 
                 DROP TABLE {tempToBeInserted};", null, transaction);
 
-            return reader.ToList();         
+            return reader;         
         }
 
-        public static async Task<IList<T>> BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
+        public static async Task<IEnumerable<T>> BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
         {
 
             var type = typeof(T);
@@ -85,7 +85,7 @@ namespace Dapper.Bulk
 
                 DROP TABLE {tempToBeInserted};", null, transaction);
 
-            return reader.ToList();
+            return reader;
         }
 
         private static string GetColumnsStringSqlServer(IEnumerable<PropertyInfo> properties, string tablePrefix = null)
