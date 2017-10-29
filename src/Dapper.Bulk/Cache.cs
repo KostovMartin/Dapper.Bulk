@@ -45,20 +45,11 @@ namespace Dapper.Bulk
                 return pis.ToList();
             }
 
-            var properties = type.GetProperties().Where(IsWriteable).ToArray();
+            var properties = type.GetProperties().ToArray();
             TypeProperties[type.TypeHandle] = properties;
             return properties.ToList();
         }
-
-        public static bool IsWriteable(PropertyInfo pi)
-        {
-            var attributes = pi.GetCustomAttributes(typeof(WriteAttribute), false).AsList();
-            if (attributes.Count != 1) return true;
-
-            var writeAttribute = (WriteAttribute)attributes[0];
-            return writeAttribute.Write;
-        }
-
+        
         public static List<PropertyInfo> KeyPropertiesCache(Type type)
         {
             if (KeyProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pi))
@@ -72,7 +63,7 @@ namespace Dapper.Bulk
             if (keyProperties.Count == 0)
             {
                 var idProp = allProperties.Find(p => string.Equals(p.Name, "id", StringComparison.CurrentCultureIgnoreCase));
-                if (idProp != null && !idProp.GetCustomAttributes(true).Any(a => a is ExplicitKeyAttribute))
+                if (idProp != null)
                 {
                     keyProperties.Add(idProp);
                 }
