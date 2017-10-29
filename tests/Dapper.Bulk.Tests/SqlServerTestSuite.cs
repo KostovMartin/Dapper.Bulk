@@ -24,16 +24,7 @@ namespace Dapper.Bulk.Tests
 	                    [Name] NVARCHAR(100) NULL,
 	                    [CreateDate] DATETIME2 NOT NULL DEFAULT(GETDATE())
                     );");
-
-                connection.Execute(
-                    $@"{dropTable("NoIdentityAndComputedTests")}
-                    CREATE TABLE NoIdentityAndComputedTests
-                    (
-	                    [IdKey] BIGINT NOT NULL PRIMARY KEY,
-	                    [Name] NVARCHAR(100) NULL,
-	                    [CreateDate] DATETIME2 NOT NULL DEFAULT(GETDATE())
-                    );");
-
+                
                 connection.Execute(
                     $@"{dropTable("NoIdentityTests")}
                     CREATE TABLE NoIdentityTests(

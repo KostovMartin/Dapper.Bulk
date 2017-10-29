@@ -5,6 +5,12 @@ Dapper.Bulk- bulk inserts for Dapper
 --------
 Dapper.Bulk contains helper methods for bulk inserting.
 
+`Download`
+--------
+<a href="https://www.nuget.org/packages/Dapper.Bulk/" target="_blank">Dapper.Bulk Nuget</a>
+```
+PM> Install-Package Dapper.Bulk
+```
 
 `Usage` 
 -------

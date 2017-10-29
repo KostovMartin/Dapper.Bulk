@@ -12,8 +12,11 @@
     <PackageTags>Fast Bulk Insert Dapper SqlServer</PackageTags>
     <Copyright>Martin Kostov</Copyright>
     <Description>Fast bulk insert using Dapper. Supports SqlServer.</Description>
-    <PackageReleaseNotes>Initial Version</PackageReleaseNotes>
+    <PackageReleaseNotes>Added batchSize and timeout as default parameters.</PackageReleaseNotes>
     <Company>Mk</Company>
+    <AssemblyVersion>1.0.1.0</AssemblyVersion>
+    <FileVersion>1.0.1.0</FileVersion>
+    <Version>1.0.1</Version>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -10,7 +10,16 @@ namespace Dapper.Bulk
 {
     internal class BulkInsertSqlServer : IBulkInsert
     {
-        public void BulkInsert<T>(IDbConnection connection, IDbTransaction transaction, IReadOnlyCollection<T> data, string tableName, IReadOnlyCollection<PropertyInfo> allProperties, IReadOnlyCollection<PropertyInfo> keyProperties, IReadOnlyCollection<PropertyInfo> computedProperties)
+        public void BulkInsert<T>(
+            IDbConnection connection, 
+            IDbTransaction transaction, 
+            IReadOnlyCollection<T> data,
+            int batchSize,
+            int bulkCopyTimeout,
+            string tableName, 
+            IReadOnlyCollection<PropertyInfo> allProperties, 
+            IReadOnlyCollection<PropertyInfo> keyProperties, 
+            IReadOnlyCollection<PropertyInfo> computedProperties)
         {
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
@@ -20,6 +29,8 @@ namespace Dapper.Bulk
 
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
+                bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
+                bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
                 bulkCopy.WriteToServer(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
@@ -40,6 +51,8 @@ namespace Dapper.Bulk
             IDbConnection connection,
             IDbTransaction transaction, 
             IReadOnlyCollection<T> data, 
+            int batchSize,
+            int bulkCopyTimeout,
             string tableName,
             IReadOnlyCollection<PropertyInfo> allProperties,
             IReadOnlyCollection<PropertyInfo> keyProperties,
@@ -47,7 +60,7 @@ namespace Dapper.Bulk
         {
             if (keyProperties.Count == 0)
             {
-                BulkInsert(connection, transaction, data, tableName, allProperties, keyProperties, computedProperties);
+                BulkInsert(connection, transaction, data, batchSize, bulkCopyTimeout, tableName, allProperties, keyProperties, computedProperties);
                 return data;
             }
 
@@ -65,6 +78,8 @@ namespace Dapper.Bulk
 
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
+                bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
+                bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
                 bulkCopy.WriteToServer(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
@@ -83,7 +98,16 @@ namespace Dapper.Bulk
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
         
-        public async Task BulkInsertAsync<T>(IDbConnection connection, IDbTransaction transaction, IReadOnlyCollection<T> data, string tableName, IReadOnlyCollection<PropertyInfo> allProperties, IReadOnlyCollection<PropertyInfo> keyProperties, IReadOnlyCollection<PropertyInfo> computedProperties)
+        public async Task BulkInsertAsync<T>(
+            IDbConnection connection, 
+            IDbTransaction transaction, 
+            IReadOnlyCollection<T> data,
+            int batchSize,
+            int bulkCopyTimeout,
+            string tableName,
+            IReadOnlyCollection<PropertyInfo> allProperties, 
+            IReadOnlyCollection<PropertyInfo> keyProperties, 
+            IReadOnlyCollection<PropertyInfo> computedProperties)
         {
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
@@ -93,6 +117,8 @@ namespace Dapper.Bulk
 
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
+                bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
+                bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
                 await bulkCopy.WriteToServerAsync(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
@@ -113,6 +139,8 @@ namespace Dapper.Bulk
             IDbConnection connection,
             IDbTransaction transaction,
             IReadOnlyCollection<T> data,
+            int batchSize,
+            int bulkCopyTimeout,
             string tableName,
             IReadOnlyCollection<PropertyInfo> allProperties,
             IReadOnlyCollection<PropertyInfo> keyProperties,
@@ -120,7 +148,7 @@ namespace Dapper.Bulk
         {
             if (keyProperties.Count == 0)
             {
-                await BulkInsertAsync(connection, transaction, data, tableName, allProperties, keyProperties, computedProperties);
+                await BulkInsertAsync(connection, transaction, data, batchSize, bulkCopyTimeout, tableName, allProperties, keyProperties, computedProperties);
                 return data;
             }
 
@@ -138,6 +166,8 @@ namespace Dapper.Bulk
 
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
+                bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
+                bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
                 await bulkCopy.WriteToServerAsync(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
