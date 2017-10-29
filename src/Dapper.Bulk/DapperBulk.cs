@@ -25,7 +25,7 @@ namespace Dapper.Bulk
             var allProperties = TypePropertiesCache(type);
             var keyProperties = KeyPropertiesCache(type);
             var computedProperties = ComputedPropertiesCache(type);
-            return adapter.BulkInsert(connection, data, tableName, allProperties, keyProperties, computedProperties, transaction);  
+            return adapter.BulkInsert(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);  
         }
 
         public static Task<IEnumerable<T>> BulkInsertAsync<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
@@ -36,7 +36,7 @@ namespace Dapper.Bulk
             var allProperties = TypePropertiesCache(type);
             var keyProperties = KeyPropertiesCache(type);
             var computedProperties = ComputedPropertiesCache(type);
-            return inserter.BulkInsertAsync(connection, data, tableName, allProperties, keyProperties, computedProperties, transaction);
+            return inserter.BulkInsertAsync(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);
         }
 
         private static IBulkInsert GetDbAdapter(IDbConnection connection)

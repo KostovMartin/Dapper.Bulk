@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -11,13 +10,13 @@ namespace Dapper.Bulk
     internal class BulkInsertSqlServer : IBulkInsert
     {
         public IEnumerable<T> BulkInsert<T>(
-            IDbConnection connection, 
-            IEnumerable<T> data, 
-            string tableName, 
-            IList<PropertyInfo> allProperties,
-            IList<PropertyInfo> keyProperties,
-            IList<PropertyInfo> computedProperties,
-            IDbTransaction transaction)
+            IDbConnection connection,
+            IDbTransaction transaction, 
+            IReadOnlyCollection<T> data, 
+            string tableName,
+            IReadOnlyCollection<PropertyInfo> allProperties,
+            IReadOnlyCollection<PropertyInfo> keyProperties,
+            IReadOnlyCollection<PropertyInfo> computedProperties)
         {
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
@@ -39,22 +38,12 @@ namespace Dapper.Bulk
 
             if (keyProperties.Count == 0)
             {
-                var inserted = connection.Execute($@"
+                connection.Execute($@"
                     INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                     SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
 
                     DROP TABLE {tempToBeInserted};", null, transaction);
-
-                if (data.Count() != inserted)
-                {
-                    throw new ArgumentException("Bulk Insert failed.");
-                }
-
-                if (computedProperties.Count > 0)
-                {
-                    throw new NotSupportedException();
-                }
-
+                
                 return data;
             }
 
@@ -74,12 +63,12 @@ namespace Dapper.Bulk
         
         public async Task<IEnumerable<T>> BulkInsertAsync<T>(
             IDbConnection connection,
-            IEnumerable<T> data,
+            IDbTransaction transaction,
+            IReadOnlyCollection<T> data,
             string tableName,
-            IList<PropertyInfo> allProperties,
-            IList<PropertyInfo> keyProperties,
-            IList<PropertyInfo> computedProperties,
-            IDbTransaction transaction)
+            IReadOnlyCollection<PropertyInfo> allProperties,
+            IReadOnlyCollection<PropertyInfo> keyProperties,
+            IReadOnlyCollection<PropertyInfo> computedProperties)
         {
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
@@ -101,22 +90,12 @@ namespace Dapper.Bulk
 
             if (keyProperties.Count == 0)
             {
-                var inserted = await connection.ExecuteAsync($@"
+                await connection.ExecuteAsync($@"
                     INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                     SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
 
                     DROP TABLE {tempToBeInserted};", null, transaction);
-
-                if (data.Count() != inserted)
-                {
-                    throw new ArgumentException("Bulk Insert failed.");
-                }
                 
-                if (computedProperties.Count > 0)
-                {
-                    throw new NotSupportedException();
-                }
-
                 return data;
             }
 

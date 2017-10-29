@@ -9,20 +9,20 @@ namespace Dapper.Bulk
     {
         IEnumerable<T> BulkInsert<T>(
             IDbConnection connection,
-            IEnumerable<T> data,
+            IDbTransaction transaction,
+            IReadOnlyCollection<T> data,
             string tableName,
-            IList<PropertyInfo> allProperties,
-            IList<PropertyInfo> keyProperties,
-            IList<PropertyInfo> computedProperties,
-            IDbTransaction transaction);
+            IReadOnlyCollection<PropertyInfo> allProperties,
+            IReadOnlyCollection<PropertyInfo> keyProperties,
+            IReadOnlyCollection<PropertyInfo> computedProperties);
 
         Task<IEnumerable<T>> BulkInsertAsync<T>(
             IDbConnection connection,
-            IEnumerable<T> data,
+            IDbTransaction transaction,
+            IReadOnlyCollection<T> data,
             string tableName,
-            IList<PropertyInfo> allProperties,
-            IList<PropertyInfo> keyProperties,
-            IList<PropertyInfo> computedProperties,
-            IDbTransaction transaction);
+            IReadOnlyCollection<PropertyInfo> allProperties,
+            IReadOnlyCollection<PropertyInfo> keyProperties,
+            IReadOnlyCollection<PropertyInfo> computedProperties);
     }
 }
