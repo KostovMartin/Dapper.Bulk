@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Dapper.Bulk
 {
-    public static partial class DapperBulk
+    public static partial class DapperBulkSqlServer
     {
         public static IEnumerable<T> BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
         {
@@ -37,6 +37,11 @@ namespace Dapper.Bulk
 
             if (keyProperties.Count == 0)
             {
+                if (computedProperties.Count > 0)
+                {
+                    throw new NotSupportedException("No identity and Computed Property is not supported.");
+                }
+
                 var inserted = connection.Execute($@"
                     INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                     SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
@@ -65,7 +70,6 @@ namespace Dapper.Bulk
 
         public static async Task<IEnumerable<T>> BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
         {
-
             var type = typeof(T);
             var tableName = Cache.GetTableName(type);
             var allProperties = Cache.TypePropertiesCache(type);
@@ -91,6 +95,11 @@ namespace Dapper.Bulk
 
             if (keyProperties.Count == 0)
             {
+                if (computedProperties.Count > 0)
+                {
+                    throw new NotSupportedException("No identity and Computed Property is not supported.");
+                }
+
                 var inserted = await connection.ExecuteAsync($@"
                     INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                     SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
