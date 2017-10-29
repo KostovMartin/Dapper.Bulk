@@ -9,18 +9,16 @@ using Xunit;
 
 namespace Dapper.Bulk.Tests
 {
-    public class StandartInsertTests
+    public class NoIdentityInsertTests
     {
         private static readonly string _connectionString = "";
 
-        [Table("Table_1")]
+        [Table("Table_2")]
         public class Node
         {
-            public int Id { get; set; }
+            public int ItemId { get; set; }
 
-            public string Name1 { get; set; }
-
-            public string Name2 { get; set; }
+            public string Name { get; set; }
         }
 
         [Fact]
@@ -29,7 +27,7 @@ namespace Dapper.Bulk.Tests
             var data = new List<Node>();
             for (int i = 0; i < 10; i++)
             {
-                data.Add(new Node { Name1 = Guid.NewGuid().ToString(), Name2 = Guid.NewGuid().ToString() });
+                data.Add(new Node { ItemId = i, Name = Guid.NewGuid().ToString() });
             }
             
             using (SqlConnection connection = new SqlConnection(_connectionString))
@@ -42,11 +40,11 @@ namespace Dapper.Bulk.Tests
                 }
             }
         }
-
+        
         [Fact]
         public void InsertSingle()
         {
-            var item = new Node { Name1 = Guid.NewGuid().ToString(), Name2 = Guid.NewGuid().ToString() };            
+            var item = new Node { ItemId = 1, Name = Guid.NewGuid().ToString() };
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
@@ -58,7 +56,7 @@ namespace Dapper.Bulk.Tests
         [Fact]
         public async Task InsertSingleAsync()
         {
-            var item = new Node { Name1 = Guid.NewGuid().ToString(), Name2 = Guid.NewGuid().ToString() };
+            var item = new Node { ItemId = 1, Name = Guid.NewGuid().ToString() };
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 await connection.OpenAsync();
@@ -66,11 +64,11 @@ namespace Dapper.Bulk.Tests
                 IsValidInsert(inserted, item);
             }
         }
-        
+
         [Fact]
         public void InsertSingleTransaction()
         {
-            var item = new Node { Name1 = Guid.NewGuid().ToString(), Name2 = Guid.NewGuid().ToString() };
+            var item = new Node { ItemId = 1, Name = Guid.NewGuid().ToString() };
             using (SqlConnection connection = new SqlConnection(_connectionString))
             {
                 connection.Open();
@@ -81,13 +79,11 @@ namespace Dapper.Bulk.Tests
                 }
             }
         }
-        
+
         private void IsValidInsert(Node inserted, Node toBeInserted)
         {
-            toBeInserted.Id.Should().Be(0);
-            inserted.Id.Should().BePositive();
-            inserted.Name1.Should().Be(toBeInserted.Name1);
-            inserted.Name2.Should().Be(toBeInserted.Name2);
+            inserted.ItemId.Should().Be(toBeInserted.ItemId);
+            inserted.Name.Should().Be(toBeInserted.Name);
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -34,7 +35,23 @@ namespace Dapper.Bulk
                 bulkCopy.WriteToServer(data.ToDataTable().CreateDataReader());
             }
 
-            var reader = connection.Query<T>($@"
+            if (keyProperties.Count == 0)
+            {
+                var inserted = connection.Execute($@"
+                    INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
+                    SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
+
+                    DROP TABLE {tempToBeInserted};", null, transaction);
+
+                if (data.Count() != inserted)
+                {
+                    throw new ArgumentException("Bulk Insert failed.");
+                }
+
+                return data;
+            }
+
+            return connection.Query<T>($@"
                 DECLARE {tempInsertedWithIdentity} TABLE ( ID bigint )
                 INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                 OUTPUT {keyPropertiesInsertedString} INTO {tempInsertedWithIdentity} ({keyPropertiesString})
@@ -43,9 +60,7 @@ namespace Dapper.Bulk
                 SELECT {allPropertiesString}
                 FROM {tableName} target INNER JOIN {tempInsertedWithIdentity} ins ON target.id = ins.id
 
-                DROP TABLE {tempToBeInserted};", null, transaction);
-
-            return reader;         
+                DROP TABLE {tempToBeInserted};", null, transaction);    
         }
 
         public static async Task<IEnumerable<T>> BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null)
@@ -72,6 +87,22 @@ namespace Dapper.Bulk
             {
                 bulkCopy.DestinationTableName = tempToBeInserted;
                 await bulkCopy.WriteToServerAsync(data.ToDataTable().CreateDataReader());
+            }
+
+            if (keyProperties.Count == 0)
+            {
+                var inserted = await connection.ExecuteAsync($@"
+                    INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
+                    SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
+
+                    DROP TABLE {tempToBeInserted};", null, transaction);
+
+                if (data.Count() != inserted)
+                {
+                    throw new ArgumentException("Bulk Insert failed.");
+                }
+
+                return data;
             }
 
             var reader = await connection.QueryAsync<T>($@"
