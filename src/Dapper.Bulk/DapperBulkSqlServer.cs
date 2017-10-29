@@ -56,8 +56,9 @@ namespace Dapper.Bulk
                 return data;
             }
 
+            var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
             return connection.Query<T>($@"
-                DECLARE {tempInsertedWithIdentity} TABLE ( ID bigint )
+                DECLARE {tempInsertedWithIdentity} TABLE ({table})
                 INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                 OUTPUT {keyPropertiesInsertedString} INTO {tempInsertedWithIdentity} ({keyPropertiesString})
                 SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
@@ -114,8 +115,9 @@ namespace Dapper.Bulk
                 return data;
             }
 
+            var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
             var reader = await connection.QueryAsync<T>($@"
-                DECLARE {tempInsertedWithIdentity} TABLE ( ID bigint )
+                DECLARE {tempInsertedWithIdentity} TABLE ({table})
                 INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                 OUTPUT {keyPropertiesInsertedString} INTO {tempInsertedWithIdentity} ({keyPropertiesString})
                 SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}

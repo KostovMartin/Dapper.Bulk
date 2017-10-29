@@ -11,7 +11,7 @@ namespace Dapper.Bulk.Tests
 {
     public class NoIdentityInsertTests
     {
-        private static readonly string _connectionString = "";
+        private static readonly string _connectionString = "Data Source=192.168.1.105\\MKMSSQL;Initial Catalog=Words;User ID=MkWeddings;Password=Sup3rn@tural;";
 
         [Table("Table_2")]
         public class Node
