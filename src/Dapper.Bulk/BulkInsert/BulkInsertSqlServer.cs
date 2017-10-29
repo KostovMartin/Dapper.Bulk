@@ -71,8 +71,7 @@ namespace Dapper.Bulk
 
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
-
-
+        
         public async Task<IEnumerable<T>> BulkInsertAsync<T>(
             IDbConnection connection,
             IEnumerable<T> data,

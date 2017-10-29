@@ -1,5 +1,4 @@
-﻿using Dapper.Bulk.Attributes;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Data;
@@ -57,7 +56,6 @@ namespace Dapper.Bulk
                 return name;
             }
 
-            //NOTE: This as dynamic trick should be able to handle both our own Table-attribute as well as the one in EntityFramework 
             var tableAttr = type.GetCustomAttributes(false).SingleOrDefault(attr => attr.GetType().Name == "TableAttribute") as dynamic;
             if (tableAttr != null)
             {
@@ -78,9 +76,9 @@ namespace Dapper.Bulk
 
         private static List<PropertyInfo> TypePropertiesCache(Type type)
         {
-            if (TypeProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pis))
+            if (TypeProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> cachedProps))
             {
-                return pis.ToList();
+                return cachedProps.ToList();
             }
 
             var properties = type.GetProperties().ToArray();
@@ -90,13 +88,13 @@ namespace Dapper.Bulk
 
         private static List<PropertyInfo> KeyPropertiesCache(Type type)
         {
-            if (KeyProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pi))
+            if (KeyProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> cachedProps))
             {
-                return pi.ToList();
+                return cachedProps.ToList();
             }
 
             var allProperties = TypePropertiesCache(type);
-            var keyProperties = allProperties.Where(p => p.GetCustomAttributes(true).Any(a => a is KeyAttribute)).ToList();
+            var keyProperties = allProperties.Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "KeyAttrsibute")).ToList();
 
             if (keyProperties.Count == 0)
             {
@@ -113,12 +111,12 @@ namespace Dapper.Bulk
 
         private static List<PropertyInfo> ComputedPropertiesCache(Type type)
         {
-            if (ComputedProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> pi))
+            if (ComputedProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> cachedProps))
             {
-                return pi.ToList();
+                return cachedProps.ToList();
             }
 
-            var computedProperties = TypePropertiesCache(type).Where(p => p.GetCustomAttributes(true).Any(a => a is ComputedAttribute)).ToList();
+            var computedProperties = TypePropertiesCache(type).Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute")).ToList();
             ComputedProperties[type.TypeHandle] = computedProperties;
             return computedProperties;
         }

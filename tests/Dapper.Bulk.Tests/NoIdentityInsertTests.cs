@@ -17,7 +17,7 @@ namespace Dapper.Bulk.Tests
         public class Node
         {
             public int ItemId { get; set; }
-
+            
             public string Name { get; set; }
         }
 

@@ -30,6 +30,12 @@ var inserted = await connection.BulkInsertAsync(data, transaction);
 `Attributes` 
 -------
 
+We do not rely on specific attributes. This means you can use whatever attributes with following names:
+ 
+* `TableAttribute` - Must have string Name property. Exists in System.ComponentModel.DataAnnotations.Schema
+* `KeyAttribute` - Marking only attribute. Exists in System.ComponentModel.DataAnnotations.Schema
+* `ComputedAttribute`  - Marking only attribute.
+
 ```csharp
 [Table("tblCars")]
 public class Car
