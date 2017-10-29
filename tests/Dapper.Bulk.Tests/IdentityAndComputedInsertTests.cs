@@ -1,3 +1,4 @@
+using Dapper.Bulk.Tests.Attributes;
 using FluentAssertions;
 using System;
 using System.Collections.Generic;
@@ -10,11 +11,7 @@ namespace Dapper.Bulk.Tests
 {
     public class IdentityAndComputedInsertTests : SqlServerTestSuite
     {
-        public class ComputedAttribute : Attribute
-        {
-        }
-
-        public class IdentityAndComputedTest
+        private class IdentityAndComputedTest
         {
             [Key]
             public int IdKey { get; set; }

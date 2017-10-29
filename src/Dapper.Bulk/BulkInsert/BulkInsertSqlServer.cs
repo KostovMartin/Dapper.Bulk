@@ -52,10 +52,7 @@ namespace Dapper.Bulk
 
                 if (computedProperties.Count > 0)
                 {
-                    return connection.Query<T>($@"
-                        SELECT TOP({inserted}) {allPropertiesString}
-                        FROM {tableName} target
-                        ORDER BY 1 ASC;", null, transaction);
+                    throw new NotSupportedException();
                 }
 
                 return data;
@@ -117,10 +114,7 @@ namespace Dapper.Bulk
                 
                 if (computedProperties.Count > 0)
                 {
-                    return await connection.QueryAsync<T>($@"
-                        SELECT TOP({inserted}) {allPropertiesString}
-                        FROM {tableName} target
-                        ORDER BY 1 ASC;", null, transaction);
+                    throw new NotSupportedException();
                 }
 
                 return data;

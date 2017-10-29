@@ -11,7 +11,7 @@ namespace Dapper.Bulk.Tests
     public class NoIdentityInsertTests : SqlServerTestSuite
     {
         [Table("NoIdentityTests")]
-        public class Node
+        private class Node
         {
             public int ItemId { get; set; }
             
