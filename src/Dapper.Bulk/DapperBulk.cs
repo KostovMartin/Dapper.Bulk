@@ -17,7 +17,7 @@ namespace Dapper.Bulk
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> ComputedProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly IBulkInsert BulkInsertSqlServer = new BulkInsertSqlServer();
 
-        public static IEnumerable<T> BulkInsert<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
+        public static void BulkInsert<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
         {
             var adapter = GetDbAdapter(connection);
             var type = typeof(T);
@@ -25,10 +25,32 @@ namespace Dapper.Bulk
             var allProperties = TypePropertiesCache(type);
             var keyProperties = KeyPropertiesCache(type);
             var computedProperties = ComputedPropertiesCache(type);
-            return adapter.BulkInsert(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);  
+            adapter.BulkInsert(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);
         }
 
-        public static Task<IEnumerable<T>> BulkInsertAsync<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
+        public static IEnumerable<T> BulkInsertAndSelect<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
+        {
+            var adapter = GetDbAdapter(connection);
+            var type = typeof(T);
+            var tableName = GetTableName(type);
+            var allProperties = TypePropertiesCache(type);
+            var keyProperties = KeyPropertiesCache(type);
+            var computedProperties = ComputedPropertiesCache(type);
+            return adapter.BulkInsertAndSelect(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);  
+        }
+
+        public static Task BulkInsertAsync<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
+        {
+            var adapter = GetDbAdapter(connection);
+            var type = typeof(T);
+            var tableName = GetTableName(type);
+            var allProperties = TypePropertiesCache(type);
+            var keyProperties = KeyPropertiesCache(type);
+            var computedProperties = ComputedPropertiesCache(type);
+            return adapter.BulkInsertAsync(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);
+        }
+
+        public static Task<IEnumerable<T>> BulkInsertAndSelectAsync<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null)
         {
             var inserter = GetDbAdapter(connection);
             var type = typeof(T);
@@ -36,7 +58,7 @@ namespace Dapper.Bulk
             var allProperties = TypePropertiesCache(type);
             var keyProperties = KeyPropertiesCache(type);
             var computedProperties = ComputedPropertiesCache(type);
-            return inserter.BulkInsertAsync(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);
+            return inserter.BulkInsertAsyncAndSelect(connection, transaction, data.ToList(), tableName, allProperties, keyProperties, computedProperties);
         }
 
         private static IBulkInsert GetDbAdapter(IDbConnection connection)

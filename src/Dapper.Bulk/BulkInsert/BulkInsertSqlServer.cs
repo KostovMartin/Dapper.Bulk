@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -9,7 +10,33 @@ namespace Dapper.Bulk
 {
     internal class BulkInsertSqlServer : IBulkInsert
     {
-        public IEnumerable<T> BulkInsert<T>(
+        public void BulkInsert<T>(IDbConnection connection, IDbTransaction transaction, IReadOnlyCollection<T> data, string tableName, IReadOnlyCollection<PropertyInfo> allProperties, IReadOnlyCollection<PropertyInfo> keyProperties, IReadOnlyCollection<PropertyInfo> computedProperties)
+        {
+            var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
+            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
+            var tempToBeInserted = $"#{tableName}_TempInsert";
+
+            connection.Execute($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
+
+            using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
+            {
+                bulkCopy.DestinationTableName = tempToBeInserted;
+                bulkCopy.WriteToServer(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
+            }
+
+            var insertedCount = connection.Execute($@"
+                INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
+                SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
+
+                DROP TABLE {tempToBeInserted};", null, transaction);
+
+            if (insertedCount != data.Count)
+            {
+                throw new ArgumentException("Inserted count does not match to items count");
+            }
+        }
+
+        public IEnumerable<T> BulkInsertAndSelect<T>(
             IDbConnection connection,
             IDbTransaction transaction, 
             IReadOnlyCollection<T> data, 
@@ -18,6 +45,12 @@ namespace Dapper.Bulk
             IReadOnlyCollection<PropertyInfo> keyProperties,
             IReadOnlyCollection<PropertyInfo> computedProperties)
         {
+            if (keyProperties.Count == 0)
+            {
+                BulkInsert(connection, transaction, data, tableName, allProperties, keyProperties, computedProperties);
+                return data;
+            }
+
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
             var keyPropertiesString = GetColumnsStringSqlServer(keyProperties);
@@ -35,18 +68,7 @@ namespace Dapper.Bulk
                 bulkCopy.DestinationTableName = tempToBeInserted;
                 bulkCopy.WriteToServer(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
-
-            if (keyProperties.Count == 0)
-            {
-                connection.Execute($@"
-                    INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
-                    SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
-
-                    DROP TABLE {tempToBeInserted};", null, transaction);
-                
-                return data;
-            }
-
+            
             var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
             var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
             return connection.Query<T>($@"
@@ -61,7 +83,33 @@ namespace Dapper.Bulk
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
         
-        public async Task<IEnumerable<T>> BulkInsertAsync<T>(
+        public async Task BulkInsertAsync<T>(IDbConnection connection, IDbTransaction transaction, IReadOnlyCollection<T> data, string tableName, IReadOnlyCollection<PropertyInfo> allProperties, IReadOnlyCollection<PropertyInfo> keyProperties, IReadOnlyCollection<PropertyInfo> computedProperties)
+        {
+            var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
+            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
+            var tempToBeInserted = $"#{tableName}_TempInsert";
+
+            await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
+
+            using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
+            {
+                bulkCopy.DestinationTableName = tempToBeInserted;
+                await bulkCopy.WriteToServerAsync(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
+            }
+
+            var insertedCount = await connection.ExecuteAsync($@"
+                    INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
+                    SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
+
+                    DROP TABLE {tempToBeInserted};", null, transaction);
+
+            if (insertedCount != data.Count)
+            {
+                throw new ArgumentException("Inserted count does not match to items count");
+            }
+        }
+
+        public async Task<IEnumerable<T>> BulkInsertAsyncAndSelect<T>(
             IDbConnection connection,
             IDbTransaction transaction,
             IReadOnlyCollection<T> data,
@@ -70,6 +118,12 @@ namespace Dapper.Bulk
             IReadOnlyCollection<PropertyInfo> keyProperties,
             IReadOnlyCollection<PropertyInfo> computedProperties)
         {
+            if (keyProperties.Count == 0)
+            {
+                await BulkInsertAsync(connection, transaction, data, tableName, allProperties, keyProperties, computedProperties);
+                return data;
+            }
+
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
             var keyPropertiesString = GetColumnsStringSqlServer(keyProperties);
@@ -87,18 +141,7 @@ namespace Dapper.Bulk
                 bulkCopy.DestinationTableName = tempToBeInserted;
                 await bulkCopy.WriteToServerAsync(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
-
-            if (keyProperties.Count == 0)
-            {
-                await connection.ExecuteAsync($@"
-                    INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
-                    SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
-
-                    DROP TABLE {tempToBeInserted};", null, transaction);
-                
-                return data;
-            }
-
+            
             var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
             var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
             var reader = await connection.QueryAsync<T>($@"

@@ -30,7 +30,7 @@ namespace Dapper.Bulk.Tests
             using (var connection = this.GetConnection())
             {
                 connection.Open();
-                var inserted = connection.BulkInsert(data).ToList();
+                var inserted = connection.BulkInsertAndSelect(data).ToList();
                 for (int i = 0; i < inserted.Count; i++)
                 {
                     IsValidInsert(inserted[i], data[i]);
@@ -45,7 +45,7 @@ namespace Dapper.Bulk.Tests
             using (var connection = this.GetConnection())
             {
                 connection.Open();
-                var inserted = connection.BulkInsert(new List<Node> { item }).First();
+                var inserted = connection.BulkInsertAndSelect(new List<Node> { item }).First();
                 IsValidInsert(inserted, item);
             }
         }
@@ -57,7 +57,7 @@ namespace Dapper.Bulk.Tests
             using (var connection = this.GetConnection())
             {
                 connection.Open();
-                var inserted = (await connection.BulkInsertAsync(new List<Node> { item })).First();
+                var inserted = (await connection.BulkInsertAndSelectAsync(new List<Node> { item })).First();
                 IsValidInsert(inserted, item);
             }
         }
@@ -71,7 +71,7 @@ namespace Dapper.Bulk.Tests
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
                 {
-                    var inserted = connection.BulkInsert(new List<Node> { item }, transaction).First();
+                    var inserted = connection.BulkInsertAndSelect(new List<Node> { item }, transaction).First();
                     IsValidInsert(inserted, item);
                 }
             }

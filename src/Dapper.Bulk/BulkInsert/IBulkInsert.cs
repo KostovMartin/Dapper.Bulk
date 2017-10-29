@@ -7,7 +7,7 @@ namespace Dapper.Bulk
 {
     internal interface IBulkInsert
     {
-        IEnumerable<T> BulkInsert<T>(
+        void BulkInsert<T>(
             IDbConnection connection,
             IDbTransaction transaction,
             IReadOnlyCollection<T> data,
@@ -16,7 +16,25 @@ namespace Dapper.Bulk
             IReadOnlyCollection<PropertyInfo> keyProperties,
             IReadOnlyCollection<PropertyInfo> computedProperties);
 
-        Task<IEnumerable<T>> BulkInsertAsync<T>(
+        IEnumerable<T> BulkInsertAndSelect<T>(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            IReadOnlyCollection<T> data,
+            string tableName,
+            IReadOnlyCollection<PropertyInfo> allProperties,
+            IReadOnlyCollection<PropertyInfo> keyProperties,
+            IReadOnlyCollection<PropertyInfo> computedProperties);
+        
+        Task BulkInsertAsync<T>(
+            IDbConnection connection,
+            IDbTransaction transaction,
+            IReadOnlyCollection<T> data,
+            string tableName,
+            IReadOnlyCollection<PropertyInfo> allProperties,
+            IReadOnlyCollection<PropertyInfo> keyProperties,
+            IReadOnlyCollection<PropertyInfo> computedProperties);
+
+        Task<IEnumerable<T>> BulkInsertAsyncAndSelect<T>(
             IDbConnection connection,
             IDbTransaction transaction,
             IReadOnlyCollection<T> data,
