@@ -6,16 +6,26 @@ Dapper.Bulk- bulk inserts for Dapper
 Dapper.Bulk contains helper methods for bulk inserting.
 
 
-`Examples` 
+`Usage` 
 -------
 
-Inserts and returns inserted entities with identities.
+* Inserts entities, without result for best performance:
 
 ```csharp
 connection.BulkInsert(data);
-await connection.BulkInsertAsync(data);
+```
 
+```csharp
+await connection.BulkInsertAsync(data);
+```
+
+* Inserts and returns inserted entities:
+
+```csharp
 var inserted = connection.BulkInsertAndSelect(data);
+```
+
+```csharp
 var inserted = await connection.BulkInsertAndSelectAsync(data);
 ```
 
