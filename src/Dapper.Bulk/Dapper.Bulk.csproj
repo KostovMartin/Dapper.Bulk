@@ -2,6 +2,22 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <NeutralLanguage>en</NeutralLanguage>
+    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageLicenseUrl>https://github.com/KostovMartin/Dapper.Bulk/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageProjectUrl>https://github.com/KostovMartin/Dapper.Bulk</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/KostovMartin/Dapper.Bulk</RepositoryUrl>
+    <Authors>Martin Kostov</Authors>
+    <PackageTags>Fast Bulk Insert Dapper SqlServer</PackageTags>
+    <Copyright>Martin Kostov</Copyright>
+    <Description>Fast bulk insert using Dapper. Supports SqlServer.</Description>
+    <PackageReleaseNotes>Initial Version</PackageReleaseNotes>
+    <Company>Mk</Company>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile></DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
