@@ -29,21 +29,16 @@ namespace Dapper.Bulk
             var tempToBeInserted = $"#{tableName}_TempInsert";
             var tempInsertedWithIdentity = $"@{tableName}_TempInserted";
 
-            connection.Execute($"SELECT TOP 0 {allPropertiesString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
+            connection.Execute($"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
 
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                bulkCopy.WriteToServer(ToDataTable(data).CreateDataReader());
+                bulkCopy.WriteToServer(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
 
             if (keyProperties.Count == 0)
             {
-                if (computedProperties.Count > 0)
-                {
-                    throw new NotSupportedException("No identity and Computed Property is not supported.");
-                }
-
                 var inserted = connection.Execute($@"
                     INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                     SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
@@ -53,6 +48,14 @@ namespace Dapper.Bulk
                 if (data.Count() != inserted)
                 {
                     throw new ArgumentException("Bulk Insert failed.");
+                }
+
+                if (computedProperties.Count > 0)
+                {
+                    return connection.Query<T>($@"
+                        SELECT TOP({inserted}) {allPropertiesString}
+                        FROM {tableName} target
+                        ORDER BY 1 ASC;", null, transaction);
                 }
 
                 return data;
@@ -91,21 +94,16 @@ namespace Dapper.Bulk
             var tempToBeInserted = $"#{tableName}_TempInsert";
             var tempInsertedWithIdentity = $"@{tableName}_TempInserted";
 
-            await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
+            await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
 
             using (var bulkCopy = new SqlBulkCopy(connection as SqlConnection, SqlBulkCopyOptions.Default, transaction as SqlTransaction))
             {
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                await bulkCopy.WriteToServerAsync(ToDataTable(data).CreateDataReader());
+                await bulkCopy.WriteToServerAsync(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
 
             if (keyProperties.Count == 0)
             {
-                if (computedProperties.Count > 0)
-                {
-                    throw new NotSupportedException("No identity and Computed Property is not supported.");
-                }
-
                 var inserted = await connection.ExecuteAsync($@"
                     INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                     SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
@@ -115,6 +113,14 @@ namespace Dapper.Bulk
                 if (data.Count() != inserted)
                 {
                     throw new ArgumentException("Bulk Insert failed.");
+                }
+                
+                if (computedProperties.Count > 0)
+                {
+                    return await connection.QueryAsync<T>($@"
+                        SELECT TOP({inserted}) {allPropertiesString}
+                        FROM {tableName} target
+                        ORDER BY 1 ASC;", null, transaction);
                 }
 
                 return data;
@@ -141,21 +147,20 @@ namespace Dapper.Bulk
             return string.Join(", ", properties.Select(property => $"{tablePrefix}[{property.Name}]"));
         }
 
-        private static DataTable ToDataTable<T>(IEnumerable<T> data)
+        private static DataTable ToDataTable<T>(IEnumerable<T> data, string tableName, IList<PropertyInfo> properties)
         {
-            var dataTable = new DataTable(typeof(T).Name);
-            var Props = typeof(T).GetProperties(BindingFlags.Public | BindingFlags.Instance);
-            foreach (var prop in Props)
+            var dataTable = new DataTable(tableName);
+            foreach (var prop in properties)
             {
                 dataTable.Columns.Add(prop.Name);
             }
 
             foreach (var item in data)
             {
-                var values = new object[Props.Length];
-                for (var i = 0; i < Props.Length; i++)
+                var values = new object[properties.Count];
+                for (var i = 0; i < properties.Count; i++)
                 {
-                    values[i] = Props[i].GetValue(item, null);
+                    values[i] = properties[i].GetValue(item, null);
                 }
                 dataTable.Rows.Add(values);
             }

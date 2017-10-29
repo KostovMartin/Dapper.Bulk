@@ -94,7 +94,7 @@ namespace Dapper.Bulk
             }
 
             var allProperties = TypePropertiesCache(type);
-            var keyProperties = allProperties.Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "KeyAttrsibute")).ToList();
+            var keyProperties = allProperties.Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "KeyAttribute")).ToList();
 
             if (keyProperties.Count == 0)
             {
