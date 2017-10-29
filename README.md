@@ -24,7 +24,7 @@ var inserted = await connection.BulkInsertAsync(data, transaction);
 `Conventions` 
 -------
 
-* `TableName` is TypeName + s if Interface I is removed.
+* `TableName` is TypeName + s. When Interface `I` is removed.
 * `Key` is Id property (case-insensitive)
 
 `Attributes` 
@@ -35,6 +35,7 @@ var inserted = await connection.BulkInsertAsync(data, transaction);
 public class Car
 {
     public int Id { get; set; }
+    
     public string Name { get; set; }
 }
 ```
@@ -42,8 +43,9 @@ public class Car
 ```csharp
 public class Car
 {
-	[Key] // Identity
+    [Key] // Identity
     public int CarId { get; set; }
+    
     public string Name { get; set; }
 }
 ```
@@ -52,7 +54,8 @@ public class Car
 public class Car
 {
     public int Id { get; set; }
-    [Computed] //will not be part of inserts
+    
+    [Computed] //will not be part of inserts, but will be returned
     public string Name { get; set; }
 }
 ```
