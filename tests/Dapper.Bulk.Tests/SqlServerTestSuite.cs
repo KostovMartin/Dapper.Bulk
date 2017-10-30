@@ -14,10 +14,10 @@ namespace Dapper.Bulk.Tests
         {
             using (var connection = new SqlConnection(ConnectionString))
             {
-                Func<string, string> dropTable = name => $"IF OBJECT_ID('{name}', 'U') IS NOT NULL DROP TABLE [{name}];";
+                string DropTable(string name) => $"IF OBJECT_ID('{name}', 'U') IS NOT NULL DROP TABLE [{name}];";
                 connection.Open();
                 connection.Execute(
-                    $@"{dropTable("IdentityAndComputedTests")}
+                    $@"{DropTable("IdentityAndComputedTests")}
                     CREATE TABLE IdentityAndComputedTests
                     (
 	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
@@ -26,7 +26,7 @@ namespace Dapper.Bulk.Tests
                     );");
                 
                 connection.Execute(
-                    $@"{dropTable("NoIdentityTests")}
+                    $@"{DropTable("NoIdentityTests")}
                     CREATE TABLE NoIdentityTests(
 	                    [ItemId] BIGINT NULL,
 	                    [Name] NVARCHAR(100) NULL

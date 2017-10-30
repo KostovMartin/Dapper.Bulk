@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -35,16 +34,11 @@ namespace Dapper.Bulk
                 bulkCopy.WriteToServer(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
 
-            var insertedCount = connection.Execute($@"
+            connection.Execute($@"
                 INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                 SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
 
                 DROP TABLE {tempToBeInserted};", null, transaction);
-
-            if (insertedCount != data.Count)
-            {
-                throw new ArgumentException("Inserted count does not match to items count");
-            }
         }
 
         public IEnumerable<T> BulkInsertAndSelect<T>(
@@ -123,16 +117,11 @@ namespace Dapper.Bulk
                 await bulkCopy.WriteToServerAsync(ToDataTable(data, tableName, allPropertiesExceptKeyAndComputed).CreateDataReader());
             }
 
-            var insertedCount = await connection.ExecuteAsync($@"
-                    INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
-                    SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
+            await connection.ExecuteAsync($@"
+                INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
+                SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
 
-                    DROP TABLE {tempToBeInserted};", null, transaction);
-
-            if (insertedCount != data.Count)
-            {
-                throw new ArgumentException("Inserted count does not match to items count");
-            }
+                DROP TABLE {tempToBeInserted};", null, transaction);
         }
 
         public async Task<IEnumerable<T>> BulkInsertAsyncAndSelect<T>(
@@ -174,7 +163,7 @@ namespace Dapper.Bulk
             
             var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
             var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
-            var reader = await connection.QueryAsync<T>($@"
+            return await connection.QueryAsync<T>($@"
                 DECLARE {tempInsertedWithIdentity} TABLE ({table})
                 INSERT INTO {tableName}({allPropertiesExceptKeyAndComputedString}) 
                 OUTPUT {keyPropertiesInsertedString} INTO {tempInsertedWithIdentity} ({keyPropertiesString})
@@ -184,8 +173,6 @@ namespace Dapper.Bulk
                 FROM {tableName} target INNER JOIN {tempInsertedWithIdentity} ins ON {joinOn}
 
                 DROP TABLE {tempToBeInserted};", null, transaction);
-
-            return reader;
         }
 
         private static string GetColumnsStringSqlServer(IEnumerable<PropertyInfo> properties, string tablePrefix = null)

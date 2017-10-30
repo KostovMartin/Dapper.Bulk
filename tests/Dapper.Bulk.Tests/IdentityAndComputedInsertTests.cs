@@ -26,7 +26,7 @@ namespace Dapper.Bulk.Tests
         public void InsertBulk()
         {
             var data = new List<IdentityAndComputedTest>();
-            for (int i = 0; i < 10; i++)
+            for (var i = 0; i < 10; i++)
             {
                 data.Add(new IdentityAndComputedTest { Name = Guid.NewGuid().ToString() });
             }
@@ -35,7 +35,7 @@ namespace Dapper.Bulk.Tests
             {
                 connection.Open();
                 var inserted = connection.BulkInsertAndSelect(data).ToList();
-                for (int i = 0; i < inserted.Count; i++)
+                for (var i = 0; i < inserted.Count; i++)
                 {
                     IsValidInsert(inserted[i], data[i]);
                 }
@@ -81,7 +81,7 @@ namespace Dapper.Bulk.Tests
             }
         }
         
-        private void IsValidInsert(IdentityAndComputedTest inserted, IdentityAndComputedTest toBeInserted)
+        private static void IsValidInsert(IdentityAndComputedTest inserted, IdentityAndComputedTest toBeInserted)
         {
             inserted.IdKey.Should().BePositive();
             inserted.Name.Should().Be(toBeInserted.Name);

@@ -114,7 +114,7 @@ namespace Dapper.Bulk
 
         private static string GetTableName(Type type)
         {
-            if (TableNames.TryGetValue(type.TypeHandle, out string name))
+            if (TableNames.TryGetValue(type.TypeHandle, out var name))
             {
                 return name;
             }
@@ -139,7 +139,7 @@ namespace Dapper.Bulk
 
         private static List<PropertyInfo> TypePropertiesCache(Type type)
         {
-            if (TypeProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> cachedProps))
+            if (TypeProperties.TryGetValue(type.TypeHandle, out var cachedProps))
             {
                 return cachedProps.ToList();
             }
@@ -151,7 +151,7 @@ namespace Dapper.Bulk
 
         private static List<PropertyInfo> KeyPropertiesCache(Type type)
         {
-            if (KeyProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> cachedProps))
+            if (KeyProperties.TryGetValue(type.TypeHandle, out var cachedProps))
             {
                 return cachedProps.ToList();
             }
@@ -174,7 +174,7 @@ namespace Dapper.Bulk
 
         private static List<PropertyInfo> ComputedPropertiesCache(Type type)
         {
-            if (ComputedProperties.TryGetValue(type.TypeHandle, out IEnumerable<PropertyInfo> cachedProps))
+            if (ComputedProperties.TryGetValue(type.TypeHandle, out var cachedProps))
             {
                 return cachedProps.ToList();
             }
