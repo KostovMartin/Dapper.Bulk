@@ -46,4 +46,12 @@
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="Dapper" Version="1.50.2" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Dapper.Bulk.Shared\IBulkInsert.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SourceLink.Create.GitHub" Version="2.5.0" />
+  </ItemGroup>
 </Project>

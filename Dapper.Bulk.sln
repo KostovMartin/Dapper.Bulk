@@ -20,6 +20,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5486311-5DC
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{137D7ECF-234C-4B95-BE01-5F35AE6999DF}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.Bulk.Shared", "src\Dapper.Bulk.Shared\Dapper.Bulk.Shared.csproj", "{2980D38D-323D-4540-B562-133112CF2C6E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -34,6 +36,10 @@ Global
 		{E9C4858D-FA85-4B00-8521-FA5B7C557675}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E9C4858D-FA85-4B00-8521-FA5B7C557675}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E9C4858D-FA85-4B00-8521-FA5B7C557675}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2980D38D-323D-4540-B562-133112CF2C6E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2980D38D-323D-4540-B562-133112CF2C6E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2980D38D-323D-4540-B562-133112CF2C6E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2980D38D-323D-4540-B562-133112CF2C6E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -41,6 +47,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{2E11DABF-4D91-41F8-8A77-9E7DE7FEE582} = {A5486311-5DC6-4184-8B10-58B071CD9742}
 		{E9C4858D-FA85-4B00-8521-FA5B7C557675} = {137D7ECF-234C-4B95-BE01-5F35AE6999DF}
+		{2980D38D-323D-4540-B562-133112CF2C6E} = {A5486311-5DC6-4184-8B10-58B071CD9742}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5134CDCE-A2CA-445E-A60A-D969350DC514}
