@@ -9,6 +9,9 @@ using System.Threading.Tasks;
 
 namespace Dapper.Bulk
 {
+    /// <summary>
+    /// Bulk inserts for Dapper
+    /// </summary>
     public static class DapperBulk
     {
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> TableNames = new ConcurrentDictionary<RuntimeTypeHandle, string>();
@@ -17,6 +20,15 @@ namespace Dapper.Bulk
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> ComputedProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly IBulkInsert BulkInsertSqlServer = new BulkInsertSqlServer();
 
+        /// <summary>
+        /// Inserts entities into table <typeparamref name="T"/>s (by default).
+        /// </summary>
+        /// <typeparam name="T">The type being inserted.</typeparam>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
         public static void BulkInsert<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var adapter = GetDbAdapter(connection);
@@ -28,6 +40,16 @@ namespace Dapper.Bulk
             adapter.BulkInsert(connection, transaction, data.ToList(), batchSize, bulkCopyTimeout, tableName, allProperties, keyProperties, computedProperties);
         }
 
+        /// <summary>
+        /// Inserts entities into table <typeparamref name="T"/>s (by default) returns inserted entities.
+        /// </summary>
+        /// <typeparam name="T">The element type of the array</typeparam>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <returns>Inserted entities</returns>
         public static IEnumerable<T> BulkInsertAndSelect<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var adapter = GetDbAdapter(connection);
@@ -39,6 +61,15 @@ namespace Dapper.Bulk
             return adapter.BulkInsertAndSelect(connection, transaction, data.ToList(), batchSize, bulkCopyTimeout, tableName, allProperties, keyProperties, computedProperties);  
         }
 
+        /// <summary>
+        /// Inserts entities into table <typeparamref name="T"/>s (by default) asynchronously.
+        /// </summary>
+        /// <typeparam name="T">The type being inserted.</typeparam>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
         public static Task BulkInsertAsync<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var adapter = GetDbAdapter(connection);
@@ -50,6 +81,16 @@ namespace Dapper.Bulk
             return adapter.BulkInsertAsync(connection, transaction, data.ToList(), batchSize, bulkCopyTimeout, tableName, allProperties, keyProperties, computedProperties);
         }
 
+        /// <summary>
+        /// Inserts entities into table <typeparamref name="T"/>s (by default) asynchronously and returns inserted entities.
+        /// </summary>
+        /// <typeparam name="T">The type being inserted.</typeparam>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <returns>Inserted entities</returns>
         public static Task<IEnumerable<T>> BulkInsertAndSelectAsync<T>(this IDbConnection connection, IEnumerable<T> data, IDbTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var inserter = GetDbAdapter(connection);

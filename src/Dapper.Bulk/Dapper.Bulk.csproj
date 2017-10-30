@@ -1,7 +1,8 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <AssemblyName>Dapper.Bulk</AssemblyName>
+    <TargetFrameworks>netstandard2.0;net45;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
@@ -9,14 +10,15 @@
     <PackageProjectUrl>https://github.com/KostovMartin/Dapper.Bulk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/KostovMartin/Dapper.Bulk</RepositoryUrl>
     <Authors>Martin Kostov</Authors>
-    <PackageTags>Fast Bulk Insert Dapper SqlServer</PackageTags>
+    <PackageTags>fast;bulk;insert;dapper;orm;sql;micro-orm;</PackageTags>
     <Copyright>Martin Kostov</Copyright>
-    <Description>Fast bulk insert using Dapper. Supports SqlServer.</Description>
-    <PackageReleaseNotes>Added batchSize and timeout as default parameters.</PackageReleaseNotes>
+    <Description>Fast bulk insert extensions for Dapper.</Description>
+    <PackageReleaseNotes>- Added support for .net 4.5; - Added documentation.</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.0.1.0</AssemblyVersion>
-    <FileVersion>1.0.1.0</FileVersion>
-    <Version>1.0.1</Version>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
+    <FileVersion>1.0.2.0</FileVersion>
+    <Version>1.0.2</Version>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -27,10 +29,21 @@
     <DocumentationFile>bin\Release\netstandard2.0\Dapper.Bulk.xml</DocumentationFile>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Dapper" Version="1.50.2" />
+  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
+    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
     <PackageReference Include="Microsoft.CSharp" Version="4.4.0" />
     <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
+    <PackageReference Include="Dapper" Version="1.50.2" />
   </ItemGroup>
 
+  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
+    <Reference Include="System" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Data.Linq" />
+    <Reference Include="Microsoft.CSharp" />
+    <PackageReference Include="Dapper" Version="1.50.2" />
+  </ItemGroup>
 </Project>
