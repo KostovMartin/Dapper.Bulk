@@ -5,7 +5,20 @@ VisualStudioVersion = 15.0.27004.2002
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Bulk", "src\Dapper.Bulk\Dapper.Bulk.csproj", "{2E11DABF-4D91-41F8-8A77-9E7DE7FEE582}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Dapper.Bulk.Tests", "tests\Dapper.Bulk.Tests\Dapper.Bulk.Tests.csproj", "{E9C4858D-FA85-4B00-8521-FA5B7C557675}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Dapper.Bulk.Tests", "tests\Dapper.Bulk.Tests\Dapper.Bulk.Tests.csproj", "{E9C4858D-FA85-4B00-8521-FA5B7C557675}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D15032B1-E772-4CC1-9324-7BF521D9ECCD}"
+	ProjectSection(SolutionItems) = preProject
+		.gitattributes = .gitattributes
+		.gitignore = .gitignore
+		CODE_OF_CONDUCT.md = CODE_OF_CONDUCT.md
+		LICENSE = LICENSE
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{A5486311-5DC6-4184-8B10-58B071CD9742}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{137D7ECF-234C-4B95-BE01-5F35AE6999DF}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,6 +37,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{2E11DABF-4D91-41F8-8A77-9E7DE7FEE582} = {A5486311-5DC6-4184-8B10-58B071CD9742}
+		{E9C4858D-FA85-4B00-8521-FA5B7C557675} = {137D7ECF-234C-4B95-BE01-5F35AE6999DF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {5134CDCE-A2CA-445E-A60A-D969350DC514}
