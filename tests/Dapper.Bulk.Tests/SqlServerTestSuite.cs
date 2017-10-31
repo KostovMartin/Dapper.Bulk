@@ -1,6 +1,4 @@
-﻿using System;
-using System.Data;
-using System.Data.SqlClient;
+﻿using System.Data.SqlClient;
 
 namespace Dapper.Bulk.Tests
 {
@@ -8,7 +6,7 @@ namespace Dapper.Bulk.Tests
     {
         private static string ConnectionString = "Data Source=192.168.1.105\\MKMSSQL;Initial Catalog=Words;User ID=MkWeddings;Password=Sup3rn@tural;";
 
-        public IDbConnection GetConnection() => new SqlConnection(ConnectionString);
+        public SqlConnection GetConnection() => new SqlConnection(ConnectionString);
 
         static SqlServerTestSuite()
         {

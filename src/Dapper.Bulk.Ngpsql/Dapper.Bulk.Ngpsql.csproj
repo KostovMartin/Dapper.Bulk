@@ -1,7 +1,7 @@
 <Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <AssemblyName>Dapper.Bulk</AssemblyName>
+    <AssemblyName>Dapper.Bulk.Ngpsql</AssemblyName>
     <TargetFrameworks>netstandard2.0;net45;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
@@ -10,7 +10,7 @@
     <PackageProjectUrl>https://github.com/KostovMartin/Dapper.Bulk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/KostovMartin/Dapper.Bulk</RepositoryUrl>
     <Authors>Martin Kostov</Authors>
-    <PackageTags>fast;bulk;insert;dapper;orm;sql;micro-orm;</PackageTags>
+    <PackageTags>fast;bulk;insert;dapper;orm;sql;ngpsql;micro-orm;</PackageTags>
     <Copyright>Martin Kostov</Copyright>
     <Description>Fast bulk insert extensions for Dapper.</Description>
     <PackageReleaseNotes>- Added support for .net 4.5; - Added documentation.</PackageReleaseNotes>
@@ -19,18 +19,6 @@
     <FileVersion>1.0.2.0</FileVersion>
     <Version>1.0.2</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DocumentationFile></DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Dapper.Bulk.xml</DocumentationFile>
-  </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
@@ -46,7 +34,7 @@
     <Reference Include="Microsoft.CSharp" />
     <PackageReference Include="Dapper" Version="1.50.2" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <Compile Include="..\Dapper.Bulk.Shared\PropertiesCache.cs" />
   </ItemGroup>
