@@ -51,31 +51,28 @@ We do not rely on specific attributes. This means you can use whatever attribute
 * `ComputedAttribute`  - Marking only attribute.
 
 ```csharp
-[Table("tblCars")]
+// Cars by convention 
 public class Car
 {
+	// Identity by convention
     public int Id { get; set; }
     
     public string Name { get; set; }
+	
+    public DateTime ManufactureDate { get; set; }
 }
 ```
 
 ```csharp
+[Table("tblCars")]
 public class Car
 {
     [Key] // Identity
     public int CarId { get; set; }
     
     public string Name { get; set; }
-}
-```
-
-```csharp
-public class Car
-{
-    public int Id { get; set; }
-    
-    [Computed] //will not be part of inserts, but will be returned
-    public string Name { get; set; }
+	
+    [Computed] // Will be ignored for inserts, but will be returned
+    public DateTime ManufactureDate { get; set; }
 }
 ```
