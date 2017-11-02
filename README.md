@@ -51,10 +51,10 @@ We do not rely on specific attributes. This means you can use whatever attribute
 * `ComputedAttribute`  - Marking only attribute.
 
 ```csharp
-// Cars by convention 
+// Table Cars by convention 
 public class Car
 {
-	// Identity by convention
+    // Identity by convention
     public int Id { get; set; }
     
     public string Name { get; set; }
