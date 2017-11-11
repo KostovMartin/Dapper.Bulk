@@ -35,11 +35,20 @@ var inserted = connection.BulkInsertAndSelect(data);
 var inserted = await connection.BulkInsertAndSelectAsync(data);
 ```
 
-`Conventions` 
+`Default Conventions` 
 -------
 
 * `TableName` is TypeName + s. When Interface `I` is removed.
 * `Key` is Id property (case-insensitive)
+
+`Custom Conventions` 
+-------
+
+`TableName` - somewhere before usage call once:
+
+```csharp
+TableMapper.SetupConvention("tbl", "s")
+```
 
 `Attributes` 
 -------
@@ -51,7 +60,7 @@ We do not rely on specific attributes. This means you can use whatever attribute
 * `ComputedAttribute`  - Marking only attribute.
 
 ```csharp
-// Table Cars by convention 
+// Table Cars by default convention 
 public class Car
 {
     // Identity by convention
