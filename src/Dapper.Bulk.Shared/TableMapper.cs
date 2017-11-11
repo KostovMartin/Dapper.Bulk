@@ -8,14 +8,22 @@ using System.Runtime.CompilerServices;
 
 namespace Dapper.Bulk
 {
+    /// <summary>
+    /// Used to store table names
+    /// </summary>
     public static class TableMapper
     {
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> TableNames = new ConcurrentDictionary<RuntimeTypeHandle, string>();
 
         private static string _prefix = string.Empty;
-        private static string _sufux = "s";
+        private static string _suffix = "s";
 
-        public static void SetupConvention(string tablePrefix, string tableSufix)
+        /// <summary>
+        /// Used to setup custom table conventions.
+        /// </summary>
+        /// <param name="tablePrefix">table name prefix</param>
+        /// <param name="tableSuffix">table name suffix</param>
+        public static void SetupConvention(string tablePrefix, string tableSuffix)
         {
             if (TableNames.Count > 0)
             {
@@ -23,7 +31,7 @@ namespace Dapper.Bulk
             }
 
             _prefix = tablePrefix;
-            _sufux = tableSufix;
+            _suffix = tableSuffix;
         }
         
         internal static string GetTableName(Type type)
@@ -43,7 +51,7 @@ namespace Dapper.Bulk
                 name = type.IsInterface && type.Name.StartsWith("I") 
                     ? type.Name.Substring(1) 
                     : type.Name;
-                name = _prefix + name + _sufux;
+                name = _prefix + name + _suffix;
             }
 
             TableNames[type.TypeHandle] = name;
