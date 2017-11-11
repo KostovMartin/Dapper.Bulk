@@ -22,7 +22,7 @@ namespace Dapper.Bulk.Tests
             public DateTime? CreateDate { get; set; }
         }
 
-        [Fact]
+        //[Fact]
         public void InsertBulk()
         {
             var data = new List<IdentityAndComputedTest>();

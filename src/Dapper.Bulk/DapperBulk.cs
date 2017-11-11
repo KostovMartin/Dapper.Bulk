@@ -24,7 +24,7 @@ namespace Dapper.Bulk
         public static void BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var type = typeof(T);
-            var tableName = PropertiesCache.GetTableName(type);
+            var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
@@ -63,7 +63,7 @@ namespace Dapper.Bulk
         public static IEnumerable<T> BulkInsertAndSelect<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var type = typeof(T);
-            var tableName = PropertiesCache.GetTableName(type);
+            var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
@@ -121,7 +121,7 @@ namespace Dapper.Bulk
         public static async Task BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var type = typeof(T);
-            var tableName = PropertiesCache.GetTableName(type);
+            var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
@@ -159,7 +159,7 @@ namespace Dapper.Bulk
         public static async Task<IEnumerable<T>> BulkInsertAndSelectAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var type = typeof(T);
-            var tableName = PropertiesCache.GetTableName(type);
+            var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);

@@ -13,11 +13,12 @@
     <PackageTags>fast;bulk;insert;dapper;orm;sql;micro-orm;</PackageTags>
     <Copyright>Martin Kostov</Copyright>
     <Description>Fast bulk insert extensions for Dapper.</Description>
-    <PackageReleaseNotes>- Added support for .net 4.5; - Added documentation.</PackageReleaseNotes>
+    <PackageReleaseNotes>- Fixed bug: exception thrown when inserted items are more than send onces, due triggers activity.
+- Added custom table name generation conventions</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.0.2.0</AssemblyVersion>
-    <FileVersion>1.0.2.0</FileVersion>
-    <Version>1.0.2</Version>
+    <AssemblyVersion>1.0.3.0</AssemblyVersion>
+    <FileVersion>1.0.3.0</FileVersion>
+    <Version>1.0.3</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
@@ -49,5 +50,6 @@
 
   <ItemGroup>
     <Compile Include="..\Dapper.Bulk.Shared\PropertiesCache.cs" />
+    <Compile Include="..\Dapper.Bulk.Shared\TableMapper.cs" />
   </ItemGroup>
 </Project>
