@@ -13,12 +13,11 @@
     <PackageTags>fast;bulk;insert;dapper;orm;sql;micro-orm;</PackageTags>
     <Copyright>Martin Kostov</Copyright>
     <Description>Fast bulk insert extensions for Dapper.</Description>
-    <PackageReleaseNotes>- Fixed bug: exception thrown when inserted items are more than send onces, due triggers activity.
-- Added custom table name generation conventions</PackageReleaseNotes>
+    <PackageReleaseNotes>- Table conventions are now cleaned on SetupConvention call.</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.0.3.0</AssemblyVersion>
-    <FileVersion>1.0.3.0</FileVersion>
-    <Version>1.0.3</Version>
+    <AssemblyVersion>1.1.0.0</AssemblyVersion>
+    <FileVersion>1.1.0.0</FileVersion>
+    <Version>1.1.0</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
