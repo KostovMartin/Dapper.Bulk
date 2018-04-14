@@ -32,6 +32,8 @@ namespace Dapper.Bulk
 
             _prefix = tablePrefix;
             _suffix = tableSuffix;
+            
+            TableNames.Clear();
         }
         
         internal static string GetTableName(Type type)
