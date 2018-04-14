@@ -44,7 +44,7 @@ var inserted = await connection.BulkInsertAndSelectAsync(data);
 `Custom Conventions` 
 -------
 
-`TableName` - somewhere before usage call once:
+`TableName` - somewhere before usage call.
 
 ```csharp
 TableMapper.SetupConvention("tbl", "s")
@@ -81,7 +81,7 @@ public class Car
     
     public string Name { get; set; }
 	
-    [Computed] // Will be ignored for inserts, but will be returned
+    [Computed] // Will be ignored for inserts, but the value in databace after insert will be returned
     public DateTime ManufactureDate { get; set; }
 }
 ```
