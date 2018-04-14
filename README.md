@@ -81,7 +81,7 @@ public class Car
     
     public string Name { get; set; }
 	
-    [Computed] // Will be ignored for inserts, but the value in databace after insert will be returned
+    [Computed] // Will be ignored for inserts, but the value in database after insert will be returned
     public DateTime ManufactureDate { get; set; }
 }
 ```
