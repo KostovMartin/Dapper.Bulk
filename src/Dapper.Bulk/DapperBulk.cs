@@ -32,7 +32,7 @@ namespace Dapper.Bulk
 
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
-            var tempToBeInserted = $"#{tableName}_TempInsert";
+            var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
 
             connection.Execute($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
 
@@ -83,8 +83,8 @@ namespace Dapper.Bulk
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
             var allPropertiesString = GetColumnsStringSqlServer(allProperties, "target.");
 
-            var tempToBeInserted = $"#{tableName}_TempInsert";
-            var tempInsertedWithIdentity = $"@{tableName}_TempInserted";
+            var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
+            var tempInsertedWithIdentity = $"@{tableName}_TempInserted".Replace(".", string.Empty);
 
             connection.Execute($"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
 
@@ -128,7 +128,7 @@ namespace Dapper.Bulk
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
-            var tempToBeInserted = $"#{tableName}_TempInsert";
+            var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
 
             await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
 
@@ -178,8 +178,8 @@ namespace Dapper.Bulk
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
             var allPropertiesString = GetColumnsStringSqlServer(allProperties, "target.");
 
-            var tempToBeInserted = $"#{tableName}_TempInsert";
-            var tempInsertedWithIdentity = $"@{tableName}_TempInserted";
+            var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
+            var tempInsertedWithIdentity = $"@{tableName}_TempInserted".Replace(".", string.Empty);
 
             await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
 
