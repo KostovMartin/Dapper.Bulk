@@ -4,7 +4,7 @@ namespace Dapper.Bulk.Tests
 {
     public class SqlServerTestSuite
     {
-        private static string ConnectionString = "Data Source=192.168.1.105\\MKMSSQL;Initial Catalog=Words;User ID=MkWeddings;Password=Sup3rn@tural;";
+        private static string ConnectionString = "Integrated Security=SSPI;Initial Catalog=Dapper;Data Source=DESKTOP-J8T6LUR;";
 
         public SqlConnection GetConnection() => new SqlConnection(ConnectionString);
 
@@ -28,7 +28,15 @@ namespace Dapper.Bulk.Tests
                     CREATE TABLE NoIdentityTests(
 	                    [ItemId] BIGINT NULL,
 	                    [Name] NVARCHAR(100) NULL
-                    );");                
+                    );");
+
+                connection.Execute(
+                    $@"{DropTable("EnumTests")}
+                    CREATE TABLE EnumTests(
+	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [IntEnum] INT NOT NULL,
+	                    [LongEnum] BIGINT NOT NULL
+                    );");
             }
         }
     }

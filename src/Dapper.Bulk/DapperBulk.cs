@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Data;
 using System.Data.SqlClient;
 using System.Linq;
@@ -208,7 +209,7 @@ namespace Dapper.Bulk
         {
             return string.Join(", ", properties.Select(property => $"{tablePrefix}[{property.Name}]"));
         }
-
+        
         private static DataTable ToDataTable<T>(IEnumerable<T> data, string tableName, IList<PropertyInfo> properties)
         {
             var dataTable = new DataTable(tableName);
@@ -217,12 +218,28 @@ namespace Dapper.Bulk
                 dataTable.Columns.Add(prop.Name);
             }
 
+            var typeCasts = new Type[properties.Count];
+            for (var i = 0; i < properties.Count; i++)
+            {
+                var isEnum = properties[i].PropertyType.IsEnum;
+                if (isEnum)
+                {
+                    typeCasts[i] = Enum.GetUnderlyingType(properties[i].PropertyType);
+                }
+                else
+                {
+                    typeCasts[i] = null;
+                }
+            }
+
             foreach (var item in data)
             {
                 var values = new object[properties.Count];
                 for (var i = 0; i < properties.Count; i++)
                 {
-                    values[i] = properties[i].GetValue(item, null);
+                    var value = properties[i].GetValue(item, null);
+                    var castToType = typeCasts[i];
+                    values[i] = castToType == null ? value : Convert.ChangeType(value, castToType);
                 }
 
                 dataTable.Rows.Add(values);

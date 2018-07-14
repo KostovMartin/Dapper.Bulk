@@ -73,6 +73,14 @@ public class Car
 ```
 
 ```csharp
+
+// Supported in v1.2+
+public enum CarType : int
+{
+    Classic = 1,
+    Coupe = 2
+}
+
 [Table("tblCars")]
 public class Car
 {
@@ -80,6 +88,8 @@ public class Car
     public int CarId { get; set; }
     
     public string Name { get; set; }
+	
+    public CarType CarType { get; set; } //SQL Data Type should match Enum type
 	
     [Computed] // Will be ignored for inserts, but the value in database after insert will be returned
     public DateTime ManufactureDate { get; set; }
