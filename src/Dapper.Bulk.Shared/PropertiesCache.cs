@@ -18,12 +18,7 @@ namespace Dapper.Bulk
             {
                 return cachedProps.ToList();
             }
-
             var properties = type.GetProperties().Where(ValidateProperty);
-
-
-
-
             TypeProperties[type.TypeHandle] = properties;
             return properties.ToList();
         }
