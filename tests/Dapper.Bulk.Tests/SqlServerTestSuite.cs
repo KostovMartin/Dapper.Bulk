@@ -4,7 +4,7 @@ namespace Dapper.Bulk.Tests
 {
     public class SqlServerTestSuite
     {
-        private static string ConnectionString = "Server=localhost;DataBase=Drp;Persist Security Info=True;User ID=test ;Password=Qwerty12345";
+        private static string ConnectionString = "Integrated Security=SSPI;Initial Catalog=Dapper;Data Source=DESKTOP-J8T6LUR;";
 
         public SqlConnection GetConnection() => new SqlConnection(ConnectionString);
 
@@ -36,6 +36,14 @@ namespace Dapper.Bulk.Tests
 	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	                    [IntEnum] INT NOT NULL,
 	                    [LongEnum] BIGINT NOT NULL
+                    );");
+
+                connection.Execute(
+                  $@"{DropTable("IdentityAndNotMappedTests")}
+                    CREATE TABLE IdentityAndNotMappedTests
+                    (
+	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [Name] NVARCHAR(100) NULL
                     );");
             }
         }

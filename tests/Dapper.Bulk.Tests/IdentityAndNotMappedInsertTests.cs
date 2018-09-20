@@ -10,36 +10,34 @@ using Xunit;
 
 namespace Dapper.Bulk.Tests
 {
-    public class InsertWithSubclassTests : SqlServerTestSuite
+    public class IdentityAndNotMappedInsertTests : SqlServerTestSuite
     {
         class TestSublass
         {
 
         }
-        private class IdentityAndComputedTest
+
+        private class IdentityAndNotMappedTest
         {
             [Key]
             public int IdKey { get; set; }
 
             public string Name { get; set; }
 
-            [Computed]
-            public DateTime? CreateDate { get; set; }
-
             public virtual TestSublass TestSublass { get; set; }
 
             [NotMapped]
             public int Ignored { get; set; }
-
         }
+
 
         [Fact]
         public void InsertBulk()
         {
-            var data = new List<IdentityAndComputedTest>();
+            var data = new List<IdentityAndNotMappedTest>();
             for (var i = 0; i < 10; i++)
             {
-                data.Add(new IdentityAndComputedTest { Name = Guid.NewGuid().ToString() });
+                data.Add(new IdentityAndNotMappedTest { Name = Guid.NewGuid().ToString() ,Ignored=2});
             }
 
             using (var connection = this.GetConnection())
@@ -56,11 +54,11 @@ namespace Dapper.Bulk.Tests
         [Fact]
         public void InsertSingle()
         {
-            var item = new IdentityAndComputedTest { Name = Guid.NewGuid().ToString() };
+            var item = new IdentityAndNotMappedTest { Name = Guid.NewGuid().ToString(), Ignored = 2 };
             using (var connection = this.GetConnection())
             {
                 connection.Open();
-                var inserted = connection.BulkInsertAndSelect(new List<IdentityAndComputedTest> { item }).First();
+                var inserted = connection.BulkInsertAndSelect(new List<IdentityAndNotMappedTest> { item }).First();
                 IsValidInsert(inserted, item);
             }
         }
@@ -68,11 +66,11 @@ namespace Dapper.Bulk.Tests
         [Fact]
         public async Task InsertSingleAsync()
         {
-            var item = new IdentityAndComputedTest { Name = Guid.NewGuid().ToString() };
+            var item = new IdentityAndNotMappedTest { Name = Guid.NewGuid().ToString(), Ignored = 2 };
             using (var connection = this.GetConnection())
             {
                 connection.Open();
-                var inserted = (await connection.BulkInsertAndSelectAsync(new List<IdentityAndComputedTest> { item })).First();
+                var inserted = (await connection.BulkInsertAndSelectAsync(new List<IdentityAndNotMappedTest> { item })).First();
                 IsValidInsert(inserted, item);
             }
         }
@@ -80,23 +78,24 @@ namespace Dapper.Bulk.Tests
         [Fact]
         public void InsertSingleTransaction()
         {
-            var item = new IdentityAndComputedTest { Name = Guid.NewGuid().ToString() };
+            var item = new IdentityAndNotMappedTest { Name = Guid.NewGuid().ToString(), Ignored = 2 };
             using (var connection = this.GetConnection())
             {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
                 {
-                    var inserted = connection.BulkInsertAndSelect(new List<IdentityAndComputedTest> { item }, transaction).First();
+                    var inserted = connection.BulkInsertAndSelect(new List<IdentityAndNotMappedTest> { item }, transaction).First();
                     IsValidInsert(inserted, item);
                 }
             }
         }
 
-        private static void IsValidInsert(IdentityAndComputedTest inserted, IdentityAndComputedTest toBeInserted)
+        private static void IsValidInsert(IdentityAndNotMappedTest inserted, IdentityAndNotMappedTest toBeInserted)
         {
             inserted.IdKey.Should().BePositive();
+            inserted.Ignored.Should().NotBe(toBeInserted.Ignored);
             inserted.Name.Should().Be(toBeInserted.Name);
-            inserted.CreateDate.Should().BeAtLeast((DateTime.UtcNow - TimeSpan.FromDays(1)).TimeOfDay);
+            inserted.TestSublass.Should().BeNull();
         }
     }
 }
