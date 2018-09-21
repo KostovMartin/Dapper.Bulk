@@ -37,6 +37,14 @@ namespace Dapper.Bulk.Tests
 	                    [IntEnum] INT NOT NULL,
 	                    [LongEnum] BIGINT NOT NULL
                     );");
+
+                connection.Execute(
+                  $@"{DropTable("IdentityAndNotMappedTests")}
+                    CREATE TABLE IdentityAndNotMappedTests
+                    (
+	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [Name] NVARCHAR(100) NULL
+                    );");
             }
         }
     }

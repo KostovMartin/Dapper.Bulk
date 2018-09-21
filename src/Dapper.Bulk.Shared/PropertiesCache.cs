@@ -11,17 +11,27 @@ namespace Dapper.Bulk
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> KeyProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypeProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> ComputedProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
-        
+
         public static List<PropertyInfo> TypePropertiesCache(Type type)
         {
             if (TypeProperties.TryGetValue(type.TypeHandle, out var cachedProps))
             {
                 return cachedProps.ToList();
             }
-
-            var properties = type.GetProperties().ToArray();
+            var properties = type.GetProperties().Where(ValidateProperty);
             TypeProperties[type.TypeHandle] = properties;
             return properties.ToList();
+        }
+
+        public static bool ValidateProperty(PropertyInfo prop)
+        {
+            bool result = prop.CanWrite; 
+            result = result && (prop.GetSetMethod(true)?.IsPublic ?? false);
+            result = result && (!prop.GetGetMethod()?.IsVirtual ?? false);
+            result = result && (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string));
+            result = result && prop.GetCustomAttributes(true).All(a => a.GetType().Name != "NotMappedAttribute");
+
+            return result;
         }
 
         public static List<PropertyInfo> KeyPropertiesCache(Type type)
