@@ -1,5 +1,4 @@
-﻿using Dapper.Bulk.Tests.Attributes;
-using FluentAssertions;
+﻿using FluentAssertions;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -12,7 +11,7 @@ namespace Dapper.Bulk.Tests
 {
     public class IdentityAndNotMappedInsertTests : SqlServerTestSuite
     {
-        class TestSublass
+        private class TestSublass
         {
 
         }

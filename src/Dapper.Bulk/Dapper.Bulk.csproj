@@ -15,9 +15,9 @@
     <Description>Fast bulk insert extensions for Dapper.</Description>
     <PackageReleaseNotes>-Added Enum support.</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.2.0.0</AssemblyVersion>
-    <FileVersion>1.2.0.0</FileVersion>
-    <Version>1.2.0</Version>
+    <AssemblyVersion>1.2.1.0</AssemblyVersion>
+    <FileVersion>1.2.1.0</FileVersion>
+    <Version>1.2.1</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 

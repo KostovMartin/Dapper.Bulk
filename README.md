@@ -95,3 +95,20 @@ public class Car
     public DateTime ManufactureDate { get; set; }
 }
 ```
+
+
+```csharp
+public class IdentityAndNotMappedTest
+{
+    [Key]
+    public int IdKey { get; set; }
+
+    public string Name { get; set; }
+
+	// Will be ignored for inserts
+    public virtual TestSublass TestSublass { get; set; }
+
+    [NotMapped] // Will be ignored for inserts
+    public int Ignored { get; set; }
+}
+```
