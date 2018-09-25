@@ -58,7 +58,7 @@ We do not rely on specific attributes. This means you can use whatever attribute
 * `TableAttribute` - Must have string Name property. Exists in System.ComponentModel.DataAnnotations.Schema
 * `KeyAttribute` - Marking only attribute. Exists in System.ComponentModel.DataAnnotations.Schema
 * `ComputedAttribute`  - Marking only attribute. For fields returned from Db.
-* `NotMapped`  - Marking only attribute. For fields not to map and ignore.
+* `NotMapped`  - Marking only attribute. For ignored fields.
 
 ```csharp
 // Table Cars by default convention 
