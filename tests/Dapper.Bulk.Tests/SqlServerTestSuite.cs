@@ -4,7 +4,7 @@ namespace Dapper.Bulk.Tests
 {
     public class SqlServerTestSuite
     {
-        private static string ConnectionString = "Integrated Security=SSPI;Initial Catalog=10betdb;Data Source=10betdb.dev;";
+        private static string ConnectionString = "Integrated Security=SSPI;Initial Catalog=Dapper;Data Source=DESKTOP-J8T6LUR;";
 
         public SqlConnection GetConnection() => new SqlConnection(ConnectionString);
 
