@@ -56,6 +56,7 @@ TableMapper.SetupConvention("tbl", "s")
 We do not rely on specific attributes. This means you can use whatever attributes with following names:
  
 * `TableAttribute` - Must have string Name property. Exists in System.ComponentModel.DataAnnotations.Schema
+* `ColumnAttribute` - Must have string Name property. Exists in System.ComponentModel.DataAnnotations.Schema
 * `KeyAttribute` - Marking only attribute. Exists in System.ComponentModel.DataAnnotations.Schema
 * `ComputedAttribute`  - Marking only attribute. For fields returned from Db.
 * `NotMapped`  - Marking only attribute. For ignored fields.
@@ -109,6 +110,26 @@ public class IdentityAndNotMappedTest
     public virtual TestSublass TestSublass { get; set; }
 
     [NotMapped] // Will be ignored for inserts
+    public int Ignored { get; set; }
+}
+```
+
+```csharp
+ private class ColumnIsDifferent
+{
+    [Key]
+    public int IdKey { get; set; }
+
+    [Column("Name_1")]
+    public string Name { get; set; }
+
+    [Column("Int_Col")]
+    public int IntCol { get; set; }
+
+    [Column("Long_Col")]
+    public long LongCol { get; set; }
+
+    [NotMapped]
     public int Ignored { get; set; }
 }
 ```

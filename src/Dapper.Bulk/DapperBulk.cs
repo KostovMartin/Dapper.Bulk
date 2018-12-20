@@ -29,9 +29,10 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
+            var columns = PropertiesCache.NewColumnNamesCache(type);
 
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
+            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed, columns);
             var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
 
             connection.Execute($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
@@ -68,6 +69,7 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
+            var columns = PropertiesCache.NewColumnNamesCache(type);
 
             if (keyProperties.Count == 0)
             {
@@ -78,10 +80,10 @@ namespace Dapper.Bulk
 
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
-            var keyPropertiesString = GetColumnsStringSqlServer(keyProperties);
-            var keyPropertiesInsertedString = GetColumnsStringSqlServer(keyProperties, "inserted.");
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
-            var allPropertiesString = GetColumnsStringSqlServer(allProperties, "target.");
+            var keyPropertiesString = GetColumnsStringSqlServer(keyProperties,columns);
+            var keyPropertiesInsertedString = GetColumnsStringSqlServer(keyProperties, columns, "inserted.");
+            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed, columns);
+            var allPropertiesString = GetColumnsStringSqlServer(allProperties, columns, "target.");
 
             var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
             var tempInsertedWithIdentity = $"@{tableName}_TempInserted".Replace(".", string.Empty);
@@ -126,8 +128,10 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
+            var columns = PropertiesCache.NewColumnNamesCache(type);
+
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
+            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed,columns);
             var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
 
             await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {tableName} target WITH(NOLOCK);", null, transaction);
@@ -164,6 +168,8 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
+            var columns = PropertiesCache.NewColumnNamesCache(type);
+
             if (keyProperties.Count == 0)
             {
                 var dataList = data.ToList();
@@ -173,10 +179,10 @@ namespace Dapper.Bulk
 
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
 
-            var keyPropertiesString = GetColumnsStringSqlServer(keyProperties);
-            var keyPropertiesInsertedString = GetColumnsStringSqlServer(keyProperties, "inserted.");
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed);
-            var allPropertiesString = GetColumnsStringSqlServer(allProperties, "target.");
+            var keyPropertiesString = GetColumnsStringSqlServer(keyProperties,columns);
+            var keyPropertiesInsertedString = GetColumnsStringSqlServer(keyProperties,columns, "inserted.");
+            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed,columns);
+            var allPropertiesString = GetColumnsStringSqlServer(allProperties, columns, "target.");
 
             var tempToBeInserted = $"#{tableName}_TempInsert".Replace(".", string.Empty);
             var tempInsertedWithIdentity = $"@{tableName}_TempInserted".Replace(".", string.Empty);
@@ -205,9 +211,12 @@ namespace Dapper.Bulk
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
 
-        private static string GetColumnsStringSqlServer(IEnumerable<PropertyInfo> properties, string tablePrefix = null)
+        private static string GetColumnsStringSqlServer(IEnumerable<PropertyInfo> properties, Dictionary<string, string> columnNames, string tablePrefix = null)
         {
-            return string.Join(", ", properties.Select(property => $"{tablePrefix}[{property.Name}]"));
+            if (tablePrefix == "target.")
+                return string.Join(", ", properties.Select(property => $"{tablePrefix}[{columnNames[property.Name]}] as [{property.Name}] "));
+            else
+                return string.Join(", ", properties.Select(property => $"{tablePrefix}[{columnNames[property.Name]}] "));
         }
         
         private static DataTable ToDataTable<T>(IEnumerable<T> data, string tableName, IList<PropertyInfo> properties)
