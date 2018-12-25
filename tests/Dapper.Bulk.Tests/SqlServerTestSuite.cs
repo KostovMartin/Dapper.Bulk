@@ -4,7 +4,7 @@ namespace Dapper.Bulk.Tests
 {
     public class SqlServerTestSuite
     {
-        private static string ConnectionString = "Integrated Security=SSPI;Initial Catalog=Dapper;Data Source=DESKTOP-J8T6LUR;";
+        private static string ConnectionString = "Server=(localdb)\\mssqllocaldb;Database=DapperBulkTest;Trusted_Connection=True;MultipleActiveResultSets=true;";
 
         public SqlConnection GetConnection() => new SqlConnection(ConnectionString);
 
@@ -44,6 +44,17 @@ namespace Dapper.Bulk.Tests
                     (
 	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	                    [Name] NVARCHAR(100) NULL
+                    );");
+
+
+                connection.Execute(
+                  $@"{DropTable("ColumnIsDifferents")}
+                    CREATE TABLE ColumnIsDifferents
+                    (
+	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [Name_1] NVARCHAR(100) NULL,
+                        [Int_Col] INT NOT NULL,
+	                    [Long_Col] BIGINT NOT NULL
                     );");
             }
         }

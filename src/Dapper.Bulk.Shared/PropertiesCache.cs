@@ -12,6 +12,8 @@ namespace Dapper.Bulk
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypeProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> ComputedProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
 
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, Dictionary<string, string>> NewColumnNames = new ConcurrentDictionary<RuntimeTypeHandle, Dictionary<string, string>>();
+
         public static List<PropertyInfo> TypePropertiesCache(Type type)
         {
             if (TypeProperties.TryGetValue(type.TypeHandle, out var cachedProps))
@@ -20,7 +22,42 @@ namespace Dapper.Bulk
             }
             var properties = type.GetProperties().Where(ValidateProperty);
             TypeProperties[type.TypeHandle] = properties;
+            NewColumnNames[type.TypeHandle] = GetAllModifiedColumnName(properties);
+
             return properties.ToList();
+        }
+
+        public static Dictionary<string, string> NewColumnNamesCache(Type type)
+        {
+            if (NewColumnNames.TryGetValue(type.TypeHandle, out var cachedProps))
+            {
+                return cachedProps;
+            }
+            var properties = type.GetProperties().Where(ValidateProperty);
+            TypeProperties[type.TypeHandle] = properties;
+            NewColumnNames[type.TypeHandle] = GetAllModifiedColumnName(properties);
+
+            return NewColumnNames[type.TypeHandle];
+        }
+
+        private static Dictionary<string, string> GetAllModifiedColumnName(IEnumerable<PropertyInfo> props)
+        {
+            Dictionary<string, string> ret = new Dictionary<string, string>();
+            foreach (var prop in props)
+            {
+                var columnAttr = prop.GetCustomAttributes(false).SingleOrDefault(attr => attr.GetType().Name == "ColumnAttribute") as dynamic;
+
+                if (columnAttr != null)
+                {
+                    ret.Add(prop.Name, columnAttr.Name);
+                }
+                else
+                {
+                    ret.Add(prop.Name, prop.Name);
+                }
+            }
+
+            return ret;
         }
 
         public static bool ValidateProperty(PropertyInfo prop)
