@@ -48,8 +48,8 @@ namespace Dapper.Bulk.Tests
 
 
                 connection.Execute(
-                  $@"{DropTable("ColumnIsDifferents")}
-                    CREATE TABLE ColumnIsDifferents
+                  $@"{DropTable("CustomColumnNames")}
+                    CREATE TABLE CustomColumnNames
                     (
 	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	                    [Name_1] NVARCHAR(100) NULL,
