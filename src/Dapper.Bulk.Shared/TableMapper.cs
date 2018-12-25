@@ -11,6 +11,7 @@ namespace Dapper.Bulk
     /// <summary>
     /// Used to store table names
     /// </summary>
+    // ReSharper disable once UnusedMember.Global
     public static class TableMapper
     {
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> TableNames = new ConcurrentDictionary<RuntimeTypeHandle, string>();
@@ -23,6 +24,7 @@ namespace Dapper.Bulk
         /// </summary>
         /// <param name="tablePrefix">table name prefix</param>
         /// <param name="tableSuffix">table name suffix</param>
+        // ReSharper disable once UnusedMember.Global
         public static void SetupConvention(string tablePrefix, string tableSuffix)
         {
             if (TableNames.Count > 0)

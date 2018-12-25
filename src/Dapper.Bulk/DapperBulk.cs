@@ -29,7 +29,7 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
-            var columns = PropertiesCache.NewColumnNamesCache(type);
+            var columns = PropertiesCache.GetColumnNamesCache(type);
 
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed, columns);
@@ -69,7 +69,7 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
-            var columns = PropertiesCache.NewColumnNamesCache(type);
+            var columns = PropertiesCache.GetColumnNamesCache(type);
 
             if (keyProperties.Count == 0)
             {
@@ -128,7 +128,7 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
-            var columns = PropertiesCache.NewColumnNamesCache(type);
+            var columns = PropertiesCache.GetColumnNamesCache(type);
 
             var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed,columns);
@@ -168,7 +168,7 @@ namespace Dapper.Bulk
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
-            var columns = PropertiesCache.NewColumnNamesCache(type);
+            var columns = PropertiesCache.GetColumnNamesCache(type);
 
             if (keyProperties.Count == 0)
             {
@@ -211,12 +211,14 @@ namespace Dapper.Bulk
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
 
-        private static string GetColumnsStringSqlServer(IEnumerable<PropertyInfo> properties, Dictionary<string, string> columnNames, string tablePrefix = null)
+        private static string GetColumnsStringSqlServer(IEnumerable<PropertyInfo> properties, IReadOnlyDictionary<string, string> columnNames, string tablePrefix = null)
         {
             if (tablePrefix == "target.")
+            {
                 return string.Join(", ", properties.Select(property => $"{tablePrefix}[{columnNames[property.Name]}] as [{property.Name}] "));
-            else
-                return string.Join(", ", properties.Select(property => $"{tablePrefix}[{columnNames[property.Name]}] "));
+            }
+
+            return string.Join(", ", properties.Select(property => $"{tablePrefix}[{columnNames[property.Name]}] "));
         }
         
         private static DataTable ToDataTable<T>(IEnumerable<T> data, string tableName, IList<PropertyInfo> properties)

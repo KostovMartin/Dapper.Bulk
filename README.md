@@ -55,11 +55,11 @@ TableMapper.SetupConvention("tbl", "s")
 
 We do not rely on specific attributes. This means you can use whatever attributes with following names:
  
-* `TableAttribute` - Must have string Name property. Exists in System.ComponentModel.DataAnnotations.Schema
-* `ColumnAttribute` - Must have string Name property. Exists in System.ComponentModel.DataAnnotations.Schema
-* `KeyAttribute` - Marking only attribute. Exists in System.ComponentModel.DataAnnotations.Schema
-* `ComputedAttribute`  - Marking only attribute. For fields returned from Db.
-* `NotMapped`  - Marking only attribute. For ignored fields.
+* `TableAttribute` - Must have string Name property. Exists in System.ComponentModel.Annotations Nuget.
+* `ColumnAttribute` - Must have string Name property. Exists in System.ComponentModel.Annotations Nuget.
+* `KeyAttribute` - Marking only attribute. Exists in System.ComponentModel.Annotations Nuget.
+* `ComputedAttribute` - Marking only attribute. For fields returned from Db.
+* `NotMapped` - Marking only attribute. For ignored fields.
 
 ```csharp
 // Table Cars by default convention 
@@ -115,21 +115,22 @@ public class IdentityAndNotMappedTest
 ```
 
 ```csharp
- private class ColumnIsDifferent
+// Supported in v1.4+
+private class CustomColumnName
 {
     [Key]
     public int IdKey { get; set; }
 
-    [Column("Name_1")]
-    public string Name { get; set; }
+    [Column("Name_1")] // Will map to SQL column Name_1
+    public string Name { get; set; } 
 
-    [Column("Int_Col")]
+    [Column("Int_Col")] // Will map to SQL column Int_Col
     public int IntCol { get; set; }
 
-    [Column("Long_Col")]
+    [Column("Long_Col")] // Will map to SQL column Long_Col
     public long LongCol { get; set; }
 
-    [NotMapped]
+    [NotMapped] // Will be ignored for inserts
     public int Ignored { get; set; }
 }
 ```

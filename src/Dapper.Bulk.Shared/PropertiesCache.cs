@@ -11,8 +11,7 @@ namespace Dapper.Bulk
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> KeyProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> TypeProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
         private static readonly ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>> ComputedProperties = new ConcurrentDictionary<RuntimeTypeHandle, IEnumerable<PropertyInfo>>();
-
-        private static readonly ConcurrentDictionary<RuntimeTypeHandle, Dictionary<string, string>> NewColumnNames = new ConcurrentDictionary<RuntimeTypeHandle, Dictionary<string, string>>();
+        private static readonly ConcurrentDictionary<RuntimeTypeHandle, IReadOnlyDictionary<string, string>> ColumnNames = new ConcurrentDictionary<RuntimeTypeHandle, IReadOnlyDictionary<string, string>>();
 
         public static List<PropertyInfo> TypePropertiesCache(Type type)
         {
@@ -20,49 +19,31 @@ namespace Dapper.Bulk
             {
                 return cachedProps.ToList();
             }
-            var properties = type.GetProperties().Where(ValidateProperty);
+
+            var properties = type.GetProperties().Where(ValidateProperty).ToList();
             TypeProperties[type.TypeHandle] = properties;
-            NewColumnNames[type.TypeHandle] = GetAllModifiedColumnName(properties);
+            ColumnNames[type.TypeHandle] = GetColumnNames(properties);
 
             return properties.ToList();
         }
 
-        public static Dictionary<string, string> NewColumnNamesCache(Type type)
+        public static IReadOnlyDictionary<string, string> GetColumnNamesCache(Type type)
         {
-            if (NewColumnNames.TryGetValue(type.TypeHandle, out var cachedProps))
+            if (ColumnNames.TryGetValue(type.TypeHandle, out var cachedProps))
             {
                 return cachedProps;
             }
-            var properties = type.GetProperties().Where(ValidateProperty);
+
+            var properties = type.GetProperties().Where(ValidateProperty).ToList();
             TypeProperties[type.TypeHandle] = properties;
-            NewColumnNames[type.TypeHandle] = GetAllModifiedColumnName(properties);
+            ColumnNames[type.TypeHandle] = GetColumnNames(properties);
 
-            return NewColumnNames[type.TypeHandle];
-        }
-
-        private static Dictionary<string, string> GetAllModifiedColumnName(IEnumerable<PropertyInfo> props)
-        {
-            Dictionary<string, string> ret = new Dictionary<string, string>();
-            foreach (var prop in props)
-            {
-                var columnAttr = prop.GetCustomAttributes(false).SingleOrDefault(attr => attr.GetType().Name == "ColumnAttribute") as dynamic;
-
-                if (columnAttr != null)
-                {
-                    ret.Add(prop.Name, columnAttr.Name);
-                }
-                else
-                {
-                    ret.Add(prop.Name, prop.Name);
-                }
-            }
-
-            return ret;
+            return ColumnNames[type.TypeHandle];
         }
 
         public static bool ValidateProperty(PropertyInfo prop)
         {
-            bool result = prop.CanWrite; 
+            var result = prop.CanWrite; 
             result = result && (prop.GetSetMethod(true)?.IsPublic ?? false);
             result = result && (!prop.GetGetMethod()?.IsVirtual ?? false);
             result = result && (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string));
@@ -104,6 +85,18 @@ namespace Dapper.Bulk
             var computedProperties = TypePropertiesCache(type).Where(p => p.GetCustomAttributes(true).Any(a => a.GetType().Name == "ComputedAttribute")).ToList();
             ComputedProperties[type.TypeHandle] = computedProperties;
             return computedProperties;
+        }
+
+        private static IReadOnlyDictionary<string, string> GetColumnNames(IEnumerable<PropertyInfo> props)
+        {
+            var ret = new Dictionary<string, string>();
+            foreach (var prop in props)
+            {
+                var columnAttr = prop.GetCustomAttributes(false).SingleOrDefault(attr => attr.GetType().Name == "ColumnAttribute") as dynamic;
+                ret.Add(prop.Name, columnAttr != null ? (string)columnAttr.Name : prop.Name);
+            }
+
+            return ret;
         }
     }
 }

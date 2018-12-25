@@ -9,10 +9,9 @@ using Xunit;
 
 namespace Dapper.Bulk.Tests
 {
-    public class ColumnIsDifferentsTests: SqlServerTestSuite
+    public class CustomColumnNameTests: SqlServerTestSuite
     {
-
-        private class ColumnIsDifferent
+        private class CustomColumnName
         {
             [Key]
             public int IdKey { get; set; }
@@ -30,14 +29,13 @@ namespace Dapper.Bulk.Tests
             public int Ignored { get; set; }
         }
 
-
         [Fact]
         public void InsertBulk()
         {
-            var data = new List<ColumnIsDifferent>();
+            var data = new List<CustomColumnName>();
             for (var i = 0; i < 10; i++)
             {
-                data.Add(new ColumnIsDifferent { Name = Guid.NewGuid().ToString() , LongCol = i * 1000, IntCol = i});
+                data.Add(new CustomColumnName { Name = Guid.NewGuid().ToString() , LongCol = i * 1000, IntCol = i});
             }
 
             using (var connection = this.GetConnection())
@@ -54,11 +52,11 @@ namespace Dapper.Bulk.Tests
         [Fact]
         public void InsertSingle()
         {
-            var item = new ColumnIsDifferent { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
+            var item = new CustomColumnName { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
             using (var connection = this.GetConnection())
             {
                 connection.Open();
-                var inserted = connection.BulkInsertAndSelect(new List<ColumnIsDifferent> { item }).First();
+                var inserted = connection.BulkInsertAndSelect(new List<CustomColumnName> { item }).First();
                 IsValidInsert(inserted, item);
             }
         }
@@ -66,11 +64,11 @@ namespace Dapper.Bulk.Tests
         [Fact]
         public async Task InsertSingleAsync()
         {
-            var item = new ColumnIsDifferent { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
+            var item = new CustomColumnName { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
             using (var connection = this.GetConnection())
             {
                 connection.Open();
-                var inserted = (await connection.BulkInsertAndSelectAsync(new List<ColumnIsDifferent> { item })).First();
+                var inserted = (await connection.BulkInsertAndSelectAsync(new List<CustomColumnName> { item })).First();
                 IsValidInsert(inserted, item);
             }
         }
@@ -78,19 +76,19 @@ namespace Dapper.Bulk.Tests
         [Fact]
         public void InsertSingleTransaction()
         {
-            var item = new ColumnIsDifferent { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
+            var item = new CustomColumnName { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
             using (var connection = this.GetConnection())
             {
                 connection.Open();
                 using (var transaction = connection.BeginTransaction())
                 {
-                    var inserted = connection.BulkInsertAndSelect(new List<ColumnIsDifferent> { item }, transaction).First();
+                    var inserted = connection.BulkInsertAndSelect(new List<CustomColumnName> { item }, transaction).First();
                     IsValidInsert(inserted, item);
                 }
             }
         }
 
-        private static void IsValidInsert(ColumnIsDifferent inserted, ColumnIsDifferent toBeInserted)
+        private static void IsValidInsert(CustomColumnName inserted, CustomColumnName toBeInserted)
         {
             inserted.IdKey.Should().BePositive();
             inserted.Name.Should().Be(toBeInserted.Name);
