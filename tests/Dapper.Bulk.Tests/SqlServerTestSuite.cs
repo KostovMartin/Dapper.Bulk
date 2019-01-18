@@ -46,7 +46,6 @@ namespace Dapper.Bulk.Tests
 	                    [Name] NVARCHAR(100) NULL
                     );");
 
-
                 connection.Execute(
                   $@"{DropTable("CustomColumnNames")}
                     CREATE TABLE CustomColumnNames
@@ -55,6 +54,13 @@ namespace Dapper.Bulk.Tests
 	                    [Name_1] NVARCHAR(100) NULL,
                         [Int_Col] INT NOT NULL,
 	                    [Long_Col] BIGINT NOT NULL
+                    );");
+
+                connection.Execute(
+                    $@"{DropTable("10_Escapes")}
+                    CREATE TABLE [10_Escapes](
+	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [10_Name] NVARCHAR(100) NULL
                     );");
             }
         }

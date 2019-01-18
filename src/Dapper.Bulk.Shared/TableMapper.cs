@@ -55,7 +55,7 @@ namespace Dapper.Bulk
                 name = type.IsInterface && type.Name.StartsWith("I") 
                     ? type.Name.Substring(1) 
                     : type.Name;
-                name = _prefix + name + _suffix;
+                name = $"{_prefix}{name}{_suffix}";
             }
 
             TableNames[type.TypeHandle] = name;
