@@ -12,7 +12,8 @@ namespace Dapper.Bulk.Tests
         {
             using (var connection = new SqlConnection(ConnectionString))
             {
-                string DropTable(string name) => $"IF OBJECT_ID('{name}', 'U') IS NOT NULL DROP TABLE [{name}];";
+                string DropTable(string name) => $"IF OBJECT_ID('{DapperBulk.FormatTableName(name)}', 'U') IS NOT NULL DROP TABLE {DapperBulk.FormatTableName(name)};";
+                string DropSchema(string name) => $"IF EXISTS (SELECT 1 FROM sys.schemas WHERE name = N'{name}') DROP SCHEMA {name}";
                 connection.Open();
                 connection.Execute(
                     $@"{DropTable("IdentityAndComputedTests")}
@@ -59,6 +60,23 @@ namespace Dapper.Bulk.Tests
                 connection.Execute(
                     $@"{DropTable("10_Escapes")}
                     CREATE TABLE [10_Escapes](
+	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [10_Name] NVARCHAR(100) NULL
+                    );");
+
+                var schemaName = "test";
+
+                connection.Execute(
+                $@"{DropTable($@"{schemaName}.10_Escapes")}");
+
+                connection.Execute(
+                    $@"{DropSchema(schemaName)}");
+
+                connection.Execute(
+                    $@"CREATE SCHEMA {schemaName}");
+
+                connection.Execute(
+                    $@"CREATE TABLE [{schemaName}].[10_Escapes](
 	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	                    [10_Name] NVARCHAR(100) NULL
                     );");
