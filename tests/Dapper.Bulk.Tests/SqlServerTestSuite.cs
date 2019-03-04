@@ -80,6 +80,16 @@ namespace Dapper.Bulk.Tests
 	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	                    [10_Name] NVARCHAR(100) NULL
                     );");
+
+                connection.Execute(
+                    $@"{DropTable("PE_TranslationPhrase")}
+                    CREATE TABLE [PE_TranslationPhrase](
+	                    [TranslationId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [CultureName] NVARCHAR(100) NOT NULL,
+	                    [Phrase] NVARCHAR(100) NOT NULL,
+	                    [PhraseHash] uniqueidentifier NULL,
+	                    [RowAddedDateTime] DATETIME2 NOT NULL DEFAULT(GETDATE())
+                    );");
             }
         }
     }
