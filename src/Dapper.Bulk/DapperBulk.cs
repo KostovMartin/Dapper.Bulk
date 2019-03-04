@@ -226,17 +226,10 @@ namespace Dapper.Bulk
         
         private static DataTable ToDataTable<T>(IEnumerable<T> data, IList<PropertyInfo> properties)
         {
-            var dataTable = new DataTable();
-            foreach (var prop in properties)
-            {
-                dataTable.Columns.Add(prop.Name);
-            }
-
             var typeCasts = new Type[properties.Count];
             for (var i = 0; i < properties.Count; i++)
             {
-                var isEnum = properties[i].PropertyType.IsEnum;
-                if (isEnum)
+                if (properties[i].PropertyType.IsEnum)
                 {
                     typeCasts[i] = Enum.GetUnderlyingType(properties[i].PropertyType);
                 }
@@ -246,14 +239,21 @@ namespace Dapper.Bulk
                 }
             }
 
+            var dataTable = new DataTable();
+            for (var i = 0; i < properties.Count; i++)
+            {
+                // Nullable types are not supported.
+                var propertyNonNullType = Nullable.GetUnderlyingType(properties[i].PropertyType) ?? properties[i].PropertyType;
+                dataTable.Columns.Add(properties[i].Name,  typeCasts[i] == null ? propertyNonNullType : typeCasts[i]);
+            }
+
             foreach (var item in data)
             {
                 var values = new object[properties.Count];
                 for (var i = 0; i < properties.Count; i++)
                 {
                     var value = properties[i].GetValue(item, null);
-                    var castToType = typeCasts[i];
-                    values[i] = castToType == null ? value : Convert.ChangeType(value, castToType);
+                    values[i] = typeCasts[i] == null ? value : Convert.ChangeType(value, typeCasts[i]);
                 }
 
                 dataTable.Rows.Add(values);
