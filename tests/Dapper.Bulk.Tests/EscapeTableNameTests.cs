@@ -8,13 +8,22 @@ namespace Dapper.Bulk.Tests
 {
     public class EscapeTableNameTests : SqlServerTestSuite
     {
-        [Table("10_Escapes")]
-        private class Escape
+        private abstract class EscapeBase
         {
             public int Id { get; set; }
 
             [Column("10_Name")]
             public string Name { get; set; }
+        }
+
+        [Table("10_Escapes")]
+        private class Escape : EscapeBase
+        {
+        }
+
+        [Table("test.10_Escapes")]
+        private class EscapeWithSchema : EscapeBase
+        {
         }
 
         [Fact]
@@ -23,7 +32,8 @@ namespace Dapper.Bulk.Tests
             var data = new List<Escape>();
             for (var i = 0; i < 10; i++)
             {
-                data.Add(new Escape {
+                data.Add(new Escape
+                {
                     Id = i,
                     Name = i.ToString()
                 });
@@ -40,7 +50,31 @@ namespace Dapper.Bulk.Tests
             }
         }
 
-        private static void IsValidInsert(Escape inserted, Escape toBeInserted)
+        [Fact]
+        public void EscapeWithSchemaTest()
+        {
+            var data = new List<EscapeWithSchema>();
+            for (var i = 0; i < 10; i++)
+            {
+                data.Add(new EscapeWithSchema
+                {
+                    Id = i,
+                    Name = i.ToString()
+                });
+            }
+
+            using (var connection = this.GetConnection())
+            {
+                connection.Open();
+                var inserted = connection.BulkInsertAndSelect(data).ToList();
+                for (var i = 0; i < data.Count; i++)
+                {
+                    IsValidInsert(inserted[i], data[i]);
+                }
+            }
+        }
+
+        private static void IsValidInsert(EscapeBase inserted, EscapeBase toBeInserted)
         {
             inserted.Id.Should().BePositive();
             inserted.Name.Should().Be(toBeInserted.Name);
