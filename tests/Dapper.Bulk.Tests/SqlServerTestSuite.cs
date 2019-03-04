@@ -4,7 +4,7 @@ namespace Dapper.Bulk.Tests
 {
     public class SqlServerTestSuite
     {
-        private static string ConnectionString = "Server=(localdb)\\mssqllocaldb;Database=DapperBulkTest;Trusted_Connection=True;MultipleActiveResultSets=true;";
+        private static string ConnectionString = "Integrated Security=SSPI;Persist Security Info=False;Initial Catalog=10betDB;Data Source=10betdb.dev;Connect Timeout=60;Application Name=Aion;MultiSubnetFailover=True";
 
         public SqlConnection GetConnection() => new SqlConnection(ConnectionString);
 
@@ -61,6 +61,16 @@ namespace Dapper.Bulk.Tests
                     CREATE TABLE [10_Escapes](
 	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	                    [10_Name] NVARCHAR(100) NULL
+                    );");
+
+                connection.Execute(
+                    $@"{DropTable("PE_TranslationPhrase")}
+                    CREATE TABLE [PE_TranslationPhrase](
+	                    [TranslationId] INT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [CultureName] NVARCHAR(100) NOT NULL,
+	                    [Phrase] NVARCHAR(100) NOT NULL,
+	                    [PhraseHash] uniqueidentifier NULL,
+	                    [RowAddedDateTime] DATETIME2 NOT NULL DEFAULT(GETDATE())
                     );");
             }
         }

@@ -45,7 +45,6 @@ namespace Dapper.Bulk
         {
             var result = prop.CanWrite; 
             result = result && (prop.GetSetMethod(true)?.IsPublic ?? false);
-            result = result && (!prop.GetGetMethod()?.IsVirtual ?? false);
             result = result && (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string));
             result = result && prop.GetCustomAttributes(true).All(a => a.GetType().Name != "NotMappedAttribute");
 
