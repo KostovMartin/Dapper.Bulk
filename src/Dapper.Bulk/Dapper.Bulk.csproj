@@ -13,11 +13,11 @@
     <PackageTags>fast;bulk;insert;dapper;orm;sql;micro-orm;</PackageTags>
     <Copyright>Martin Kostov</Copyright>
     <Description>Fast bulk insert extensions for Dapper.</Description>
-    <PackageReleaseNotes>-Fixed issue #7.</PackageReleaseNotes>
+    <PackageReleaseNotes>-Fixed issues #8 and #10</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.4.1.0</AssemblyVersion>
-    <FileVersion>1.4.1.0</FileVersion>
-    <Version>1.4.1</Version>
+    <AssemblyVersion>1.4.2.0</AssemblyVersion>
+    <FileVersion>1.4.2.0</FileVersion>
+    <Version>1.4.2</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
