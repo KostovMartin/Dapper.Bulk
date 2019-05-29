@@ -48,6 +48,16 @@ namespace Dapper.Bulk
             result = result && (!prop.PropertyType.IsClass || prop.PropertyType == typeof(string));
             result = result && prop.GetCustomAttributes(true).All(a => a.GetType().Name != "NotMappedAttribute");
 
+            var writeAttribute = prop.GetCustomAttributes(true).FirstOrDefault(x => x.GetType().Name == "WriteAttribute");
+            if (writeAttribute != null)
+            {
+                var writeProperty = writeAttribute.GetType().GetProperty("Write");
+                if (writeProperty != null && writeProperty.PropertyType == typeof(bool))
+                {
+                    result = result && (bool) writeProperty.GetValue(writeAttribute);
+                }
+            }
+
             return result;
         }
 
