@@ -132,5 +132,8 @@ private class CustomColumnName
 
     [NotMapped] // Will be ignored for inserts
     public int Ignored { get; set; }
+
+    [Write(false)] // Will be ignored for inserts
+    public int Ignored { get; set; }
 }
 ```
