@@ -90,6 +90,15 @@ namespace Dapper.Bulk.Tests
 	                    [PhraseHash] uniqueidentifier NULL,
 	                    [RowAddedDateTime] DATETIME2 NOT NULL DEFAULT(GETDATE())
                     );");
+
+                connection.Execute(
+                    $@"{DropTable("IdentityAndWriteInsertTests")}
+                    CREATE TABLE IdentityAndWriteInsertTests
+                    (
+	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [Name] NVARCHAR(100) NULL,
+	                    [NotIgnored] INT NULL
+                    );");
             }
         }
     }
