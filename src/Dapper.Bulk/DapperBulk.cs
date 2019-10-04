@@ -28,6 +28,21 @@ namespace Dapper.Bulk
         public static void BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
         {
             var type = typeof(T);
+            BulkInsert(connection,type,data.Cast<object>(),transaction,batchSize,bulkCopyTimeout);
+        }
+
+        /// <summary>
+        /// Inserts entities into table.
+        /// by default, the table is named after the data type specified.
+        /// </summary>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="type">The type being inserted.</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        public static void BulkInsert(this SqlConnection connection, Type type, IEnumerable<object> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        { 
             var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);

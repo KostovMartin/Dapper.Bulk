@@ -102,7 +102,8 @@ namespace Dapper.Bulk
             foreach (var prop in props)
             {
                 var columnAttr = prop.GetCustomAttributes(false).SingleOrDefault(attr => attr.GetType().Name == "ColumnAttribute") as dynamic;
-                ret.Add(prop.Name, columnAttr != null ? (string)columnAttr.Name : prop.Name);
+                // if the column attribute exists, and specifies a column name, use that, otherwise fall back to the property name as the column name
+                ret.Add(prop.Name, columnAttr != null ? (string)columnAttr.Name??prop.Name : prop.Name);
             }
 
             return ret;
