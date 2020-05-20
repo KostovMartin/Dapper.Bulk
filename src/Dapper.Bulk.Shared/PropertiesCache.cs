@@ -84,6 +84,17 @@ namespace Dapper.Bulk
             return keyProperties;
         }
 
+        public static List<PropertyInfo> ExplicitKeyPropertiesCache(Type type)
+        {
+            var keyProperties = KeyPropertiesCache(type);
+            var explicitKeys = keyProperties
+               .Where<PropertyInfo>(p => ((IEnumerable<object>)p.GetCustomAttributes(true))
+               .Any<object>((Func<object, bool>)(a => a.GetType().Name == "ExplicitKeyAttribute")))
+               .ToList<PropertyInfo>();
+
+            return explicitKeys;
+        }
+
         public static List<PropertyInfo> ComputedPropertiesCache(Type type)
         {
             if (ComputedProperties.TryGetValue(type.TypeHandle, out var cachedProps))

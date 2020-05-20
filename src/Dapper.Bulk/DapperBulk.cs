@@ -46,10 +46,11 @@ namespace Dapper.Bulk
             var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var keyProperties = PropertiesCache.KeyPropertiesCache(type);
+            var explicitKeyProperties = PropertiesCache.ExplicitKeyPropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
             var columns = PropertiesCache.GetColumnNamesCache(type);
 
-            var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
+            var allPropertiesExceptKeyAndComputed = explicitKeyProperties.Count > 0 ? allProperties :allProperties.Except(keyProperties.Union(computedProperties)).ToList();
             var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed, columns);
             var tempToBeInserted = $"#TempInsert_{tableName}".Replace(".", string.Empty);
 
