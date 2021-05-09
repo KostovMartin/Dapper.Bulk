@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>Dapper.Bulk</AssemblyName>
-    <TargetFrameworks>netstandard2.0;net45;net451;</TargetFrameworks>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
@@ -13,11 +13,13 @@
     <PackageTags>fast;bulk;insert;dapper;orm;sql;micro-orm;</PackageTags>
     <Copyright>Martin Kostov</Copyright>
     <Description>Fast bulk insert extensions for Dapper.</Description>
-    <PackageReleaseNotes>-Fixed issues #8 and #10</PackageReleaseNotes>
+    <PackageReleaseNotes>-Added byte[] type support
+-Added netstandard2.1 support
+-Removed framework 4.5 support.</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.4.3.0</AssemblyVersion>
-    <FileVersion>1.4.3.0</FileVersion>
-    <Version>1.4.3</Version>
+    <AssemblyVersion>1.5.0.0</AssemblyVersion>
+    <FileVersion>1.5.0.0</FileVersion>
+    <Version>1.5.0</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
@@ -30,30 +32,10 @@
     <DocumentationFile>bin\Release\netstandard2.0\Dapper.Bulk.xml</DocumentationFile>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">
-    <DefineConstants>TRACE;DEBUG;NETSTANDARD2_0</DefineConstants>
-  </PropertyGroup>
-
-  <ItemGroup Condition=" '$(TargetFramework)' == 'netstandard2.0' ">
-    <PackageReference Include="Microsoft.CSharp" Version="4.5.0" />
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
     <PackageReference Include="System.Dynamic.Runtime" Version="4.3.0" />
-    <PackageReference Include="Dapper" Version="1.50.5" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net45'">
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Linq" />
-    <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="Dapper" Version="1.50.2" />
-  </ItemGroup>
-
-  <ItemGroup Condition="'$(TargetFramework)' == 'net451'">
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Data.Linq" />
-    <Reference Include="Microsoft.CSharp" />
-    <PackageReference Include="Dapper" Version="1.50.5" />
+    <PackageReference Include="Dapper" Version="1.60.6" />
   </ItemGroup>
 
   <ItemGroup>
