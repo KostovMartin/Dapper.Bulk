@@ -40,6 +40,13 @@ namespace Dapper.Bulk.Tests
                     );");
 
                 connection.Execute(
+                    $@"{DropTable("ByteArrays")}
+                    CREATE TABLE ByteArrays(
+	                    [Id] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [TestArray] varbinary(100) NOT NULL
+                    );");
+
+                connection.Execute(
                   $@"{DropTable("IdentityAndNotMappedTests")}
                     CREATE TABLE IdentityAndNotMappedTests
                     (

@@ -6,7 +6,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
-    <PackageLicenseUrl>https://github.com/KostovMartin/Dapper.Bulk/blob/master/LICENSE</PackageLicenseUrl>
+    <PackageLicenseUrl></PackageLicenseUrl>
     <PackageProjectUrl>https://github.com/KostovMartin/Dapper.Bulk</PackageProjectUrl>
     <RepositoryUrl>https://github.com/KostovMartin/Dapper.Bulk</RepositoryUrl>
     <Authors>Martin Kostov</Authors>
@@ -15,10 +15,11 @@
     <Description>Fast bulk insert extensions for Dapper.</Description>
     <PackageReleaseNotes>-Fixed issues #8 and #10</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.4.2.0</AssemblyVersion>
-    <FileVersion>1.4.2.0</FileVersion>
-    <Version>1.4.2</Version>
+    <AssemblyVersion>1.4.3.0</AssemblyVersion>
+    <FileVersion>1.4.3.0</FileVersion>
+    <Version>1.4.3</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -58,6 +59,13 @@
   <ItemGroup>
     <Compile Include="..\Dapper.Bulk.Shared\PropertiesCache.cs" />
     <Compile Include="..\Dapper.Bulk.Shared\TableMapper.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\..\LICENSE">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
   
 </Project>
