@@ -25,10 +25,10 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
-        public static void BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        public static void BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
             var type = typeof(T);
-            BulkInsert(connection,type,data.Cast<object>(),transaction,batchSize,bulkCopyTimeout);
+            BulkInsert(connection,type,data.Cast<object>(),transaction,batchSize,bulkCopyTimeout,identityInsert);
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
-        public static void BulkInsert(this SqlConnection connection, Type type, IEnumerable<object> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        public static void BulkInsert(this SqlConnection connection, Type type, IEnumerable<object> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         { 
             var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
@@ -49,24 +49,31 @@ namespace Dapper.Bulk
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
             var columns = PropertiesCache.GetColumnNamesCache(type);
 
-            var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed, columns);
+            var insertProperties = allProperties.Except(computedProperties).ToList();
+            
+            if (!identityInsert)
+                insertProperties = insertProperties.Except(keyProperties).ToList();
+
+            var (identityInsertOn, identityInsertOff, sqlBulkCopyOptions) = GetIdentityInsertOptions(identityInsert, tableName);
+            
+            var insertPropertiesString = GetColumnsStringSqlServer(insertProperties, columns);
             var tempToBeInserted = $"#TempInsert_{tableName}".Replace(".", string.Empty);
 
-            connection.Execute($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
+            connection.Execute($@"SELECT TOP 0 {insertPropertiesString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
 
-            using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+            using (var bulkCopy = new SqlBulkCopy(connection, sqlBulkCopyOptions, transaction))
             {
                 bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
                 bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                bulkCopy.WriteToServer(ToDataTable(data, allPropertiesExceptKeyAndComputed).CreateDataReader());
+                bulkCopy.WriteToServer(ToDataTable(data, insertProperties).CreateDataReader());
             }
 
             connection.Execute($@"
-                INSERT INTO {FormatTableName(tableName)}({allPropertiesExceptKeyAndComputedString}) 
-                SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
-
+                {identityInsertOn}
+                INSERT INTO {FormatTableName(tableName)}({insertPropertiesString}) 
+                SELECT {insertPropertiesString} FROM {tempToBeInserted}
+                {identityInsertOff}
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
 
@@ -80,7 +87,7 @@ namespace Dapper.Bulk
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
         /// <returns>Inserted entities</returns>
-        public static IEnumerable<T> BulkInsertAndSelect<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        public static IEnumerable<T> BulkInsertAndSelect<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
             var type = typeof(T);
             var tableName = TableMapper.GetTableName(type);
@@ -96,37 +103,45 @@ namespace Dapper.Bulk
                 return dataList;
             }
 
-            var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
+            var insertProperties = allProperties.Except(computedProperties).ToList();
+            
+            if (!identityInsert)
+                insertProperties = insertProperties.Except(keyProperties).ToList();
 
+            var (identityInsertOn, identityInsertOff, sqlBulkCopyOptions) = GetIdentityInsertOptions(identityInsert, tableName);
+            
             var keyPropertiesString = GetColumnsStringSqlServer(keyProperties,columns);
             var keyPropertiesInsertedString = GetColumnsStringSqlServer(keyProperties, columns, "inserted.");
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed, columns);
+            var insertPropertiesString = GetColumnsStringSqlServer(insertProperties, columns);
             var allPropertiesString = GetColumnsStringSqlServer(allProperties, columns, "target.");
 
             var tempToBeInserted = $"#TempInsert_{tableName}".Replace(".", string.Empty);
             var tempInsertedWithIdentity = $"@TempInserted_{tableName}".Replace(".", string.Empty);
 
-            connection.Execute($"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
+            connection.Execute($"SELECT TOP 0 {insertPropertiesString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
 
-            using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+            using (var bulkCopy = new SqlBulkCopy(connection, sqlBulkCopyOptions, transaction))
             {
                 bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
                 bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                bulkCopy.WriteToServer(ToDataTable(data, allPropertiesExceptKeyAndComputed).CreateDataReader());
+                bulkCopy.WriteToServer(ToDataTable(data, insertProperties).CreateDataReader());
             }
 
             var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
             var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
+            
             return connection.Query<T>($@"
+                {identityInsertOn}
                 DECLARE {tempInsertedWithIdentity} TABLE ({table})
-                INSERT INTO {FormatTableName(tableName)}({allPropertiesExceptKeyAndComputedString}) 
+                INSERT INTO {FormatTableName(tableName)}({insertPropertiesString}) 
                 OUTPUT {keyPropertiesInsertedString} INTO {tempInsertedWithIdentity} ({keyPropertiesString})
-                SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
+                SELECT {insertPropertiesString} FROM {tempToBeInserted}
+                {identityInsertOff}
 
                 SELECT {allPropertiesString}
                 FROM {FormatTableName(tableName)} target INNER JOIN {tempInsertedWithIdentity} ins ON {joinOn}
-
+                
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
 
@@ -139,7 +154,7 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
-        public static async Task BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        public static async Task BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
             var type = typeof(T);
             var tableName = TableMapper.GetTableName(type);
@@ -148,23 +163,31 @@ namespace Dapper.Bulk
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
             var columns = PropertiesCache.GetColumnNamesCache(type);
 
-            var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed,columns);
+            var insertProperties = allProperties.Except(computedProperties).ToList();
+            
+            if (!identityInsert)
+                insertProperties = insertProperties.Except(keyProperties).ToList();
+
+            var (identityInsertOn, identityInsertOff, sqlBulkCopyOptions) = GetIdentityInsertOptions(identityInsert, tableName);
+            
+            var insertPropertiesString = GetColumnsStringSqlServer(insertProperties,columns);
             var tempToBeInserted = $"#TempInsert_{tableName}".Replace(".", string.Empty);
 
-            await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
+            await connection.ExecuteAsync($@"SELECT TOP 0 {insertPropertiesString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
 
-            using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+            using (var bulkCopy = new SqlBulkCopy(connection, sqlBulkCopyOptions, transaction))
             {
                 bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
                 bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                await bulkCopy.WriteToServerAsync(ToDataTable(data, allPropertiesExceptKeyAndComputed).CreateDataReader());
+                await bulkCopy.WriteToServerAsync(ToDataTable(data, insertProperties).CreateDataReader());
             }
 
             await connection.ExecuteAsync($@"
-                INSERT INTO {FormatTableName(tableName)}({allPropertiesExceptKeyAndComputedString}) 
-                SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
+                {identityInsertOn}
+                INSERT INTO {FormatTableName(tableName)}({insertPropertiesString}) 
+                SELECT {insertPropertiesString} FROM {tempToBeInserted}
+                {identityInsertOff}
 
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
@@ -179,7 +202,7 @@ namespace Dapper.Bulk
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
         /// <returns>Inserted entities</returns>
-        public static async Task<IEnumerable<T>> BulkInsertAndSelectAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        public static async Task<IEnumerable<T>> BulkInsertAndSelectAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
             var type = typeof(T);
             var tableName = TableMapper.GetTableName(type);
@@ -195,34 +218,40 @@ namespace Dapper.Bulk
                 return dataList;
             }
 
-            var allPropertiesExceptKeyAndComputed = allProperties.Except(keyProperties.Union(computedProperties)).ToList();
+            var insertProperties = allProperties.Except(computedProperties).ToList();
+            
+            if (!identityInsert)
+                insertProperties = insertProperties.Except(keyProperties).ToList();
 
+            var (identityInsertOn, identityInsertOff, sqlBulkCopyOptions) = GetIdentityInsertOptions(identityInsert, tableName);
+         
             var keyPropertiesString = GetColumnsStringSqlServer(keyProperties,columns);
             var keyPropertiesInsertedString = GetColumnsStringSqlServer(keyProperties,columns, "inserted.");
-            var allPropertiesExceptKeyAndComputedString = GetColumnsStringSqlServer(allPropertiesExceptKeyAndComputed,columns);
+            var insertPropertiesString = GetColumnsStringSqlServer(insertProperties,columns);
             var allPropertiesString = GetColumnsStringSqlServer(allProperties, columns, "target.");
 
             var tempToBeInserted = $"#TempInsert_{tableName}".Replace(".", string.Empty);
             var tempInsertedWithIdentity = $"@TempInserted_{tableName}".Replace(".", string.Empty);
 
-            await connection.ExecuteAsync($@"SELECT TOP 0 {allPropertiesExceptKeyAndComputedString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
+            await connection.ExecuteAsync($@"SELECT TOP 0 {insertPropertiesString} INTO {tempToBeInserted} FROM {FormatTableName(tableName)} target WITH(NOLOCK);", null, transaction);
 
-            using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+            using (var bulkCopy = new SqlBulkCopy(connection,sqlBulkCopyOptions, transaction))
             {
                 bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
                 bulkCopy.BatchSize = batchSize;
                 bulkCopy.DestinationTableName = tempToBeInserted;
-                await bulkCopy.WriteToServerAsync(ToDataTable(data, allPropertiesExceptKeyAndComputed).CreateDataReader());
+                await bulkCopy.WriteToServerAsync(ToDataTable(data, insertProperties).CreateDataReader());
             }
 
             var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
             var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
             return await connection.QueryAsync<T>($@"
+                {identityInsertOn}
                 DECLARE {tempInsertedWithIdentity} TABLE ({table})
-                INSERT INTO {FormatTableName(tableName)}({allPropertiesExceptKeyAndComputedString}) 
+                INSERT INTO {FormatTableName(tableName)}({insertPropertiesString}) 
                 OUTPUT {keyPropertiesInsertedString} INTO {tempInsertedWithIdentity} ({keyPropertiesString})
-                SELECT {allPropertiesExceptKeyAndComputedString} FROM {tempToBeInserted}
-
+                SELECT {insertPropertiesString} FROM {tempToBeInserted}
+                {identityInsertOff}
                 SELECT {allPropertiesString}
                 FROM {FormatTableName(tableName)} target INNER JOIN {tempInsertedWithIdentity} ins ON {joinOn}
 
@@ -293,5 +322,12 @@ namespace Dapper.Bulk
 
             return $"[{parts[0]}].[{parts[1]}]";
         }
+
+        private static (string identityInsertOn, string identityInsertOff, SqlBulkCopyOptions bulkCopyOptions)
+            GetIdentityInsertOptions(bool identityInsert, string tableName)
+            => identityInsert
+                ? ($"SET IDENTITY_INSERT {FormatTableName(tableName)} ON",
+                    $"SET IDENTITY_INSERT {FormatTableName(tableName)} OFF", SqlBulkCopyOptions.KeepIdentity)
+                : (string.Empty, string.Empty, SqlBulkCopyOptions.Default);
     }
 }
