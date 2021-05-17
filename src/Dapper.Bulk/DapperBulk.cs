@@ -25,6 +25,7 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
         public static void BulkInsert<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
             var type = typeof(T);
@@ -41,6 +42,7 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
         public static void BulkInsert(this SqlConnection connection, Type type, IEnumerable<object> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         { 
             var tableName = TableMapper.GetTableName(type);
@@ -86,6 +88,7 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
         /// <returns>Inserted entities</returns>
         public static IEnumerable<T> BulkInsertAndSelect<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
@@ -154,6 +157,7 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
         public static async Task BulkInsertAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
             var type = typeof(T);
@@ -201,6 +205,7 @@ namespace Dapper.Bulk
         /// <param name="transaction">The transaction to run under, null (the default) if none</param>
         /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
         /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
         /// <returns>Inserted entities</returns>
         public static async Task<IEnumerable<T>> BulkInsertAndSelectAsync<T>(this SqlConnection connection, IEnumerable<T> data, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30, bool identityInsert = false)
         {
