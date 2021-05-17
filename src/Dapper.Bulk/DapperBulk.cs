@@ -291,7 +291,17 @@ namespace Dapper.Bulk
                 return $"[{table}]";
             }
 
-            return $"[{parts[0]}].[{parts[1]}]";
+            var tableName = "";
+            for (int i = 0; i < parts.Length; i++)
+            {
+                tableName += $"[{parts[i]}]";
+                if (i + 1 < parts.Length)
+                {
+                    tableName += ".";
+                }
+            }
+
+            return tableName;
         }
     }
 }
