@@ -15,7 +15,9 @@
     <Description>Fast bulk insert extensions for Dapper.</Description>
     <PackageReleaseNotes>-Added byte[] type support
 -Added netstandard2.1 support
--Removed framework 4.5 support.</PackageReleaseNotes>
+-Removed framework 4.5 support.
+-Catalog.Schema.TableName Nomenclature Fix #21
+-Identity Insert support</PackageReleaseNotes>
     <Company>Mk</Company>
     <AssemblyVersion>1.5.0.0</AssemblyVersion>
     <FileVersion>1.5.0.0</FileVersion>
