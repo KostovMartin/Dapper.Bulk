@@ -131,8 +131,8 @@ namespace Dapper.Bulk
                 bulkCopy.WriteToServer(ToDataTable(data, insertProperties).CreateDataReader());
             }
 
-            var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
-            var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
+            var table = string.Join(", ", keyProperties.Select(k => $"[{(columns.ContainsKey(k.Name) ? columns[k.Name] : k.Name)}] bigint"));
+            var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{(columns.ContainsKey(k.Name) ? columns[k.Name] : k.Name)}] = ins.[{(columns.ContainsKey(k.Name) ? columns[k.Name] : k.Name)}]"));
             
             return connection.Query<T>($@"
                 {identityInsertOn}
@@ -248,8 +248,8 @@ namespace Dapper.Bulk
                 await bulkCopy.WriteToServerAsync(ToDataTable(data, insertProperties).CreateDataReader());
             }
 
-            var table = string.Join(", ", keyProperties.Select(k => $"[{k.Name }] bigint"));
-            var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{k.Name }] = ins.[{k.Name }]"));
+            var table = string.Join(", ", keyProperties.Select(k => $"[{(columns.ContainsKey(k.Name) ? columns[k.Name] : k.Name)}] bigint"));
+            var joinOn = string.Join(" AND ", keyProperties.Select(k => $"target.[{(columns.ContainsKey(k.Name) ? columns[k.Name] : k.Name)}] = ins.[{(columns.ContainsKey(k.Name) ? columns[k.Name] : k.Name)}]"));
             return await connection.QueryAsync<T>($@"
                 {identityInsertOn}
                 DECLARE {tempInsertedWithIdentity} TABLE ({table})

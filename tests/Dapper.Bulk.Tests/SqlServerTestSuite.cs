@@ -1,4 +1,4 @@
-﻿using System.Data.SqlClient;
+using System.Data.SqlClient;
 
 namespace Dapper.Bulk.Tests
 {
@@ -66,7 +66,7 @@ namespace Dapper.Bulk.Tests
                   $@"{DropTable("CustomColumnNames")}
                     CREATE TABLE CustomColumnNames
                     (
-	                    [IdKey] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
+	                    [Id_Key] BIGINT IDENTITY(1,1) NOT NULL PRIMARY KEY,
 	                    [Name_1] NVARCHAR(100) NULL,
                         [Int_Col] INT NOT NULL,
 	                    [Long_Col] BIGINT NOT NULL
