@@ -34,6 +34,13 @@ var inserted = connection.BulkInsertAndSelect(data);
 ```csharp
 var inserted = await connection.BulkInsertAndSelectAsync(data);
 ```
+* Inserts entities into temp table:
+
+```csharp
+connection.BulkInsertIntoTempTable(data,"#mytemptable");
+var data2=connection.Query<TypeOfdata>("select * from #mytemptable");
+```
+
 
 `Default Conventions` 
 -------
