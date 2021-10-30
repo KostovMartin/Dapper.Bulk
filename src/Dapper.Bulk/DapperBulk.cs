@@ -81,7 +81,7 @@ namespace Dapper.Bulk
 
 
         /// <summary>
-        /// Inserts entities into table.
+        /// Inserts entities into temp table. This table exists only in the current connection.
         /// by default, the table is named after the data type specified.
         /// </summary>
         /// <param name="connection">Open SqlConnection</param>
@@ -96,11 +96,9 @@ namespace Dapper.Bulk
         {
             tempTableName="#"+tempTableName.Replace("#",String.Empty);
             
-            //var tableName = TableMapper.GetTableName(type);
             var allProperties = PropertiesCache.TypePropertiesCache(type);
             var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
             var insertProperties = allProperties.Except(computedProperties).ToList();
-
             
             var dataTable= ToDataTable(data, insertProperties);
             
