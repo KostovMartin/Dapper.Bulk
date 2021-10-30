@@ -79,6 +79,101 @@ namespace Dapper.Bulk
                 DROP TABLE {tempToBeInserted};", null, transaction);
         }
 
+
+        /// <summary>
+        /// Inserts entities into table.
+        /// by default, the table is named after the data type specified.
+        /// </summary>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="type">The type being inserted.</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="tempTableName">Entities to insert</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
+        public static void BulkInsertIntoTempTable(this SqlConnection connection, Type type, IEnumerable<object> data, string tempTableName, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        {
+            tempTableName="#"+tempTableName.Replace("#",String.Empty);
+            
+            //var tableName = TableMapper.GetTableName(type);
+            var allProperties = PropertiesCache.TypePropertiesCache(type);
+            var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
+            var insertProperties = allProperties.Except(computedProperties).ToList();
+
+            
+            var dataTable= ToDataTable(data, insertProperties);
+            
+            var sql= CreateTABLE(tempTableName, dataTable);
+
+            connection.Execute(sql, null, transaction);
+
+            using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+            {
+                bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
+                bulkCopy.BatchSize = batchSize;
+                bulkCopy.DestinationTableName = tempTableName;
+                bulkCopy.WriteToServer(dataTable.CreateDataReader());
+            }
+            
+        }
+
+
+        /// <summary>
+        /// Inserts entities into temp table. This table exists only in the current connection.
+        /// </summary>
+        /// <typeparam name="T">The type being inserted.</typeparam>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="tempTableName">Temp table name</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
+        public static void BulkInsertIntoTempTable<T>(this SqlConnection connection, IEnumerable<T> data,string tempTableName, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        {
+            var type = typeof(T);
+            BulkInsertIntoTempTable(connection, type, data.Cast<object>(), tempTableName, transaction, batchSize, bulkCopyTimeout);
+        }
+
+
+        /// <summary>
+        /// Inserts entities into temp table. This table exists only in the current connection.
+        /// by default, the table is named after the data type specified.
+        /// </summary>
+        /// <param name="connection">Open SqlConnection</param>
+        /// <param name="type">The type being inserted.</param>
+        /// <param name="data">Entities to insert</param>
+        /// <param name="tempTableName">Entities to insert</param>
+        /// <param name="transaction">The transaction to run under, null (the default) if none</param>
+        /// <param name="batchSize">Number of bulk items inserted together, 0 (the default) if all</param>
+        /// <param name="bulkCopyTimeout">Number of seconds before bulk command execution timeout, 30 (the default)</param>
+        /// <param name="identityInsert">Usage of db generated ids. By default DB generated IDs are used (identityInsert=false)</param>
+        public async static Task BulkInsertIntoTempTableAsync(this SqlConnection connection, Type type, IEnumerable<object> data, string tempTableName, SqlTransaction transaction = null, int batchSize = 0, int bulkCopyTimeout = 30)
+        {
+            tempTableName = "#" + tempTableName.Replace("#", String.Empty);
+
+            var allProperties = PropertiesCache.TypePropertiesCache(type);
+            var computedProperties = PropertiesCache.ComputedPropertiesCache(type);
+            var insertProperties = allProperties.Except(computedProperties).ToList();
+
+
+            var dataTable = ToDataTable(data, insertProperties);
+
+            var sql = CreateTABLE(tempTableName, dataTable);
+
+            await connection.ExecuteAsync(sql, null, transaction);
+
+            using (var bulkCopy = new SqlBulkCopy(connection, SqlBulkCopyOptions.Default, transaction))
+            {
+                bulkCopy.BulkCopyTimeout = bulkCopyTimeout;
+                bulkCopy.BatchSize = batchSize;
+                bulkCopy.DestinationTableName = tempTableName;
+                await bulkCopy.WriteToServerAsync(dataTable.CreateDataReader());
+            }
+
+        }
+
         /// <summary>
         /// Inserts entities into table <typeparamref name="T"/>s (by default) returns inserted entities.
         /// </summary>
@@ -310,7 +405,55 @@ namespace Dapper.Bulk
 
             return dataTable;
         }
-
+        
+        private static string CreateTABLE(string tableName, DataTable table)
+        {
+            string sqlsc;
+            sqlsc = "CREATE TABLE " + tableName + "(";
+            for (int i = 0; i < table.Columns.Count; i++)
+            {
+                sqlsc += "\n [" + table.Columns[i].ColumnName + "] ";
+                string columnType = table.Columns[i].DataType.ToString();
+                switch (columnType)
+                {
+                    case "System.Int32":
+                        sqlsc += " int ";
+                        break;
+                    case "System.Int64":
+                        sqlsc += " bigint ";
+                        break;
+                    case "System.Int16":
+                        sqlsc += " smallint";
+                        break;
+                    case "System.Byte":
+                        sqlsc += " tinyint";
+                        break;
+                    case "System.Decimal":
+                        sqlsc += " decimal ";
+                        break;
+                    case "System.DateTime":
+                        sqlsc += " datetime2(7) ";
+                        break;
+                    case "System.Boolean":
+                        sqlsc += " bit ";
+                        break;
+                    case "System.Guid":
+                        sqlsc += " uniqueidentifier ";
+                        break;
+                        
+                    case "System.String":
+                    default:
+                        sqlsc += string.Format(" nvarchar({0}) ", table.Columns[i].MaxLength == -1 ? "max" : table.Columns[i].MaxLength.ToString());
+                        break;
+                }
+                if (table.Columns[i].AutoIncrement)
+                    sqlsc += " IDENTITY(" + table.Columns[i].AutoIncrementSeed.ToString() + "," + table.Columns[i].AutoIncrementStep.ToString() + ") ";
+                if (!table.Columns[i].AllowDBNull)
+                    sqlsc += " NOT NULL ";
+                sqlsc += ",";
+            }
+            return sqlsc.Substring(0, sqlsc.Length - 1) + "\n)";
+        }
         internal static string FormatTableName(string table)
         {
             if (string.IsNullOrEmpty(table))
