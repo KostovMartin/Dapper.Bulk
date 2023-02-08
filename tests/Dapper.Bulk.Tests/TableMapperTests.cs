@@ -37,8 +37,8 @@ namespace Dapper.Bulk.Tests
         public void ReadSchema()
         {
             var name = TableMapper.GetTableName(typeof(Node2));
-            name.Should().Be("TestSchema.Node2Table");
 
+            name.Should().Be("TestSchema.Node2Table");
         }
 
         //[Fact]
