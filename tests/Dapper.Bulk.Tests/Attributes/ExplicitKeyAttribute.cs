@@ -1,8 +1,7 @@
 ﻿using System;
 
-namespace Dapper.Bulk.Tests.Attributes
+namespace Dapper.Bulk.Tests.Attributes;
+
+internal class ExplicitKeyAttribute : Attribute
 {
-    internal class ExplicitKeyAttribute : Attribute
-    {
-    }
 }

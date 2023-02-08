@@ -4,80 +4,75 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using Xunit;
 
-namespace Dapper.Bulk.Tests
+namespace Dapper.Bulk.Tests;
+
+public class EscapeTableNameTests : SqlServerTestSuite
 {
-    public class EscapeTableNameTests : SqlServerTestSuite
+    private abstract class EscapeBase
     {
-        private abstract class EscapeBase
-        {
-            public int Id { get; set; }
+        public int Id { get; set; }
 
-            [Column("10_Name")]
-            public string Name { get; set; }
-        }
+        [Column("10_Name")]
+        public string Name { get; set; }
+    }
 
-        [Table("10_Escapes")]
-        private class Escape : EscapeBase
-        {
-        }
+    [Table("10_Escapes")]
+    private class Escape : EscapeBase
+    {
+    }
 
-        [Table("test.10_Escapes")]
-        private class EscapeWithSchema : EscapeBase
-        {
-        }
+    [Table("test.10_Escapes")]
+    private class EscapeWithSchema : EscapeBase
+    {
+    }
 
-        [Fact]
-        public void EscapesTest()
+    [Fact]
+    public void EscapesTest()
+    {
+        var data = new List<Escape>();
+        for (var i = 0; i < 10; i++)
         {
-            var data = new List<Escape>();
-            for (var i = 0; i < 10; i++)
+            data.Add(new Escape
             {
-                data.Add(new Escape
-                {
-                    Id = i,
-                    Name = i.ToString()
-                });
-            }
-
-            using (var connection = this.GetConnection())
-            {
-                connection.Open();
-                var inserted = connection.BulkInsertAndSelect(data).ToList();
-                for (var i = 0; i < data.Count; i++)
-                {
-                    IsValidInsert(inserted[i], data[i]);
-                }
-            }
+                Id = i,
+                Name = i.ToString()
+            });
         }
 
-        [Fact]
-        public void EscapeWithSchemaTest()
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(data).ToList();
+        for (var i = 0; i < data.Count; i++)
         {
-            var data = new List<EscapeWithSchema>();
-            for (var i = 0; i < 10; i++)
-            {
-                data.Add(new EscapeWithSchema
-                {
-                    Id = i,
-                    Name = i.ToString()
-                });
-            }
-
-            using (var connection = this.GetConnection())
-            {
-                connection.Open();
-                var inserted = connection.BulkInsertAndSelect(data).ToList();
-                for (var i = 0; i < data.Count; i++)
-                {
-                    IsValidInsert(inserted[i], data[i]);
-                }
-            }
+            IsValidInsert(inserted[i], data[i]);
         }
+    }
 
-        private static void IsValidInsert(EscapeBase inserted, EscapeBase toBeInserted)
+    [Fact]
+    public void EscapeWithSchemaTest()
+    {
+        var data = new List<EscapeWithSchema>();
+        for (var i = 0; i < 10; i++)
         {
-            inserted.Id.Should().BePositive();
-            inserted.Name.Should().Be(toBeInserted.Name);
+            data.Add(new EscapeWithSchema
+            {
+                Id = i,
+                Name = i.ToString()
+            });
         }
+
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(data).ToList();
+        for (var i = 0; i < data.Count; i++)
+        {
+            IsValidInsert(inserted[i], data[i]);
+        }
+    }
+
+    private static void IsValidInsert(EscapeBase inserted, EscapeBase toBeInserted)
+    {
+        inserted.Id.Should().BePositive();
+        inserted.Name.Should().Be(toBeInserted.Name);
     }
 }
