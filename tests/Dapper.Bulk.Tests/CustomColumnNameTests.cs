@@ -13,7 +13,7 @@ namespace Dapper.Bulk.Tests
     {
         private class CustomColumnName
         {
-            [Key]
+            [Key, Column("Id_Key")]
             public int IdKey { get; set; }
 
             [Column("Name_1")]
