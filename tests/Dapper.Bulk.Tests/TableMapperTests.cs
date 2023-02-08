@@ -1,11 +1,18 @@
 using FluentAssertions;
 using Xunit;
+using Dapper;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Dapper.Bulk.Tests
 {
     public class TableMapperTests
     {
         private class Node
+        {
+        }
+
+        [Table("Node2Table", Schema = "TestSchema")]
+        private class Node2
         {
         }
 
@@ -23,6 +30,15 @@ namespace Dapper.Bulk.Tests
             var name = TableMapper.GetTableName(typeof(Node));
 
             name.Should().NotBe("Node");
+        }
+
+
+        [Fact]
+        public void ReadSchema()
+        {
+            var name = TableMapper.GetTableName(typeof(Node2));
+            name.Should().Be("TestSchema.Node2Table");
+
         }
 
         //[Fact]
