@@ -14,7 +14,7 @@ namespace Dapper.Bulk;
 // ReSharper disable once UnusedMember.Global
 public static class TableMapper
 {
-    private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> TableNames = new ConcurrentDictionary<RuntimeTypeHandle, string>();
+    private static readonly ConcurrentDictionary<RuntimeTypeHandle, string> TableNames = new();
 
     private static string _prefix = string.Empty;
     private static string _suffix = "s";
@@ -27,7 +27,7 @@ public static class TableMapper
     // ReSharper disable once UnusedMember.Global
     public static void SetupConvention(string tablePrefix, string tableSuffix)
     {
-        if (TableNames.Count > 0)
+        if (!TableNames.IsEmpty)
         {
             throw new InvalidConstraintException("TableMapper.SetupConvention called after usage.");
         }
@@ -57,9 +57,7 @@ public static class TableMapper
         }
         else
         {
-            name = type.IsInterface && type.Name.StartsWith("I") 
-                ? type.Name.Substring(1) 
-                : type.Name;
+            name = type.IsInterface && type.Name.StartsWith("I") ? type.Name[1..] : type.Name;
             name = $"{_prefix}{name}{_suffix}";
         }
 

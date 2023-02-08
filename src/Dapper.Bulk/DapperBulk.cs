@@ -293,7 +293,7 @@ public static class DapperBulk
         {
             // Nullable types are not supported.
             var propertyNonNullType = Nullable.GetUnderlyingType(properties[i].PropertyType) ?? properties[i].PropertyType;
-            dataTable.Columns.Add(properties[i].Name,  typeCasts[i] == null ? propertyNonNullType : typeCasts[i]);
+            dataTable.Columns.Add(properties[i].Name, typeCasts[i] ?? propertyNonNullType);
         }
 
         foreach (var item in data)

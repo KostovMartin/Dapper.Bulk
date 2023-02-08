@@ -34,14 +34,12 @@ public class IdentityAndWriteInsertTests : SqlServerTestSuite
             data.Add(new IdentityAndWriteInsertTests.IdentityAndWriteInsertTest { Name = Guid.NewGuid().ToString(), Ignored = 2, NotIgnored = 5});
         }
 
-        using (var connection = this.GetConnection())
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(data).ToList();
+        for (var i = 0; i < data.Count; i++)
         {
-            connection.Open();
-            var inserted = connection.BulkInsertAndSelect(data).ToList();
-            for (var i = 0; i < data.Count; i++)
-            {
-                IsValidInsert(inserted[i], data[i]);
-            }
+            IsValidInsert(inserted[i], data[i]);
         }
     }
 
@@ -49,39 +47,31 @@ public class IdentityAndWriteInsertTests : SqlServerTestSuite
     public void InsertSingle()
     {
         var item = new IdentityAndWriteInsertTests.IdentityAndWriteInsertTest { Name = Guid.NewGuid().ToString(), Ignored = 2, NotIgnored = 5 };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            var inserted = connection.BulkInsertAndSelect(new List<IdentityAndWriteInsertTests.IdentityAndWriteInsertTest> { item }).First();
-            IsValidInsert(inserted, item);
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(new List<IdentityAndWriteInsertTests.IdentityAndWriteInsertTest> { item }).First();
+        IsValidInsert(inserted, item);
     }
 
     [Fact]
     public async Task InsertSingleAsync()
     {
         var item = new IdentityAndWriteInsertTests.IdentityAndWriteInsertTest { Name = Guid.NewGuid().ToString(), Ignored = 2, NotIgnored = 5 };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            var inserted = (await connection.BulkInsertAndSelectAsync(new List<IdentityAndWriteInsertTests.IdentityAndWriteInsertTest> { item })).First();
-            IsValidInsert(inserted, item);
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = (await connection.BulkInsertAndSelectAsync(new List<IdentityAndWriteInsertTests.IdentityAndWriteInsertTest> { item })).First();
+        IsValidInsert(inserted, item);
     }
 
     [Fact]
     public void InsertSingleTransaction()
     {
         var item = new IdentityAndWriteInsertTests.IdentityAndWriteInsertTest { Name = Guid.NewGuid().ToString(), Ignored = 2, NotIgnored = 5 };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            using (var transaction = connection.BeginTransaction())
-            {
-                var inserted = connection.BulkInsertAndSelect(new List<IdentityAndWriteInsertTests.IdentityAndWriteInsertTest> { item }, transaction).First();
-                IsValidInsert(inserted, item);
-            }
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+        var inserted = connection.BulkInsertAndSelect(new List<IdentityAndWriteInsertTests.IdentityAndWriteInsertTest> { item }, transaction).First();
+        IsValidInsert(inserted, item);
     }
 
     private static void IsValidInsert(IdentityAndWriteInsertTests.IdentityAndWriteInsertTest inserted, IdentityAndWriteInsertTests.IdentityAndWriteInsertTest toBeInserted)

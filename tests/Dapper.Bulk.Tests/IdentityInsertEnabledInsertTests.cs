@@ -8,7 +8,6 @@ using Xunit;
 
 namespace Dapper.Bulk.Tests;
 
-
 public class IdentityInsertEnabledInsertTests : SqlServerTestSuite
 {
     private class IdentityInsertEnabledTest
@@ -28,14 +27,12 @@ public class IdentityInsertEnabledInsertTests : SqlServerTestSuite
             data.Add(new IdentityInsertEnabledTest { IdKey = -1*i, Name = Guid.NewGuid().ToString() });
         }
 
-        using (var connection = this.GetConnection())
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(data, identityInsert: true).ToList();
+        for (var i = 0; i < data.Count; i++)
         {
-            connection.Open();
-            var inserted = connection.BulkInsertAndSelect(data, identityInsert:true).ToList();
-            for (var i = 0; i < data.Count; i++)
-            {
-                IsValidInsert(inserted[i], data[i]);
-            }
+            IsValidInsert(inserted[i], data[i]);
         }
     }
     
@@ -43,39 +40,31 @@ public class IdentityInsertEnabledInsertTests : SqlServerTestSuite
     public void InsertSingle()
     {
         var item = new IdentityInsertEnabledTest { IdKey = -123151, Name = Guid.NewGuid().ToString() };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            var inserted = connection.BulkInsertAndSelect(new List<IdentityInsertEnabledTest> { item }, identityInsert:true).First();
-            IsValidInsert(inserted, item);
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(new List<IdentityInsertEnabledTest> { item }, identityInsert: true).First();
+        IsValidInsert(inserted, item);
     }
     
     [Fact]
     public async Task InsertSingleAsync()
     {
         var item = new IdentityInsertEnabledTest { IdKey = -123152, Name = Guid.NewGuid().ToString() };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            var inserted = (await connection.BulkInsertAndSelectAsync(new List<IdentityInsertEnabledTest> { item }, identityInsert:true)).First();
-            IsValidInsert(inserted, item);
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = (await connection.BulkInsertAndSelectAsync(new List<IdentityInsertEnabledTest> { item }, identityInsert: true)).First();
+        IsValidInsert(inserted, item);
     }
     
     [Fact]
     public void InsertSingleTransaction()
     {
         var item = new IdentityInsertEnabledTest { IdKey = -123153, Name = Guid.NewGuid().ToString() };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            using (var transaction = connection.BeginTransaction())
-            {
-                var inserted = connection.BulkInsertAndSelect(new List<IdentityInsertEnabledTest> { item }, transaction, identityInsert:true).First();
-                IsValidInsert(inserted, item);
-            }
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+        var inserted = connection.BulkInsertAndSelect(new List<IdentityInsertEnabledTest> { item }, transaction, identityInsert: true).First();
+        IsValidInsert(inserted, item);
     }
     
     private static void IsValidInsert(IdentityInsertEnabledTest inserted, IdentityInsertEnabledTest toBeInserted)

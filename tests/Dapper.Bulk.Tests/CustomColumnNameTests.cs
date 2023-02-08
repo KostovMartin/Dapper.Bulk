@@ -38,14 +38,12 @@ public class CustomColumnNameTests: SqlServerTestSuite
             data.Add(new CustomColumnName { Name = Guid.NewGuid().ToString() , LongCol = i * 1000, IntCol = i});
         }
 
-        using (var connection = this.GetConnection())
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(data).ToList();
+        for (var i = 0; i < data.Count; i++)
         {
-            connection.Open();
-            var inserted = connection.BulkInsertAndSelect(data).ToList();
-            for (var i = 0; i < data.Count; i++)
-            {
-                IsValidInsert(inserted[i], data[i]);
-            }
+            IsValidInsert(inserted[i], data[i]);
         }
     }
 
@@ -53,39 +51,31 @@ public class CustomColumnNameTests: SqlServerTestSuite
     public void InsertSingle()
     {
         var item = new CustomColumnName { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            var inserted = connection.BulkInsertAndSelect(new List<CustomColumnName> { item }).First();
-            IsValidInsert(inserted, item);
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(new List<CustomColumnName> { item }).First();
+        IsValidInsert(inserted, item);
     }
 
     [Fact]
     public async Task InsertSingleAsync()
     {
         var item = new CustomColumnName { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            var inserted = (await connection.BulkInsertAndSelectAsync(new List<CustomColumnName> { item })).First();
-            IsValidInsert(inserted, item);
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = (await connection.BulkInsertAndSelectAsync(new List<CustomColumnName> { item })).First();
+        IsValidInsert(inserted, item);
     }
 
     [Fact]
     public void InsertSingleTransaction()
     {
         var item = new CustomColumnName { Name = Guid.NewGuid().ToString(), LongCol = 1000, IntCol = 1 };
-        using (var connection = this.GetConnection())
-        {
-            connection.Open();
-            using (var transaction = connection.BeginTransaction())
-            {
-                var inserted = connection.BulkInsertAndSelect(new List<CustomColumnName> { item }, transaction).First();
-                IsValidInsert(inserted, item);
-            }
-        }
+        using var connection = GetConnection();
+        connection.Open();
+        using var transaction = connection.BeginTransaction();
+        var inserted = connection.BulkInsertAndSelect(new List<CustomColumnName> { item }, transaction).First();
+        IsValidInsert(inserted, item);
     }
 
     private static void IsValidInsert(CustomColumnName inserted, CustomColumnName toBeInserted)

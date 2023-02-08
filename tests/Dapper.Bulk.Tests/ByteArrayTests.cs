@@ -30,14 +30,12 @@ public class ByteArrayTests : SqlServerTestSuite
             });
         }
 
-        using (var connection = this.GetConnection())
+        using var connection = GetConnection();
+        connection.Open();
+        var inserted = connection.BulkInsertAndSelect(data).ToList();
+        for (var i = 0; i < data.Count; i++)
         {
-            connection.Open();
-            var inserted = connection.BulkInsertAndSelect(data).ToList();
-            for (var i = 0; i < data.Count; i++)
-            {
-                IsValidInsert(inserted[i], data[i]);
-            }
+            IsValidInsert(inserted[i], data[i]);
         }
     }
 

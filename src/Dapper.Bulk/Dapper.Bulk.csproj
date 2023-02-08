@@ -13,15 +13,15 @@
     <PackageTags>fast;bulk;insert;dapper;orm;sql;micro-orm;</PackageTags>
     <Copyright>Martin Kostov</Copyright>
     <Description>Fast bulk insert extensions for Dapper.</Description>
-    <PackageReleaseNotes>-Added byte[] type support
--Added netstandard2.1 support
--Removed framework 4.5 support.
--Catalog.Schema.TableName Nomenclature Fix #21
--Identity Insert support</PackageReleaseNotes>
+    <PackageReleaseNotes>-Reference package Microsoft.Data.SqlClient instead of System.Data.SqlClient
+-Added support for Schema attribute
+-Allow ColumnName and Key on the same field
+-TargetFramework is now net6.0
+-Updated nugets and code style</PackageReleaseNotes>
     <Company>Mk</Company>
-    <AssemblyVersion>1.5.0.0</AssemblyVersion>
-    <FileVersion>1.5.0.0</FileVersion>
-    <Version>1.5.0</Version>
+    <AssemblyVersion>1.6.0.0</AssemblyVersion>
+    <FileVersion>1.6.0.0</FileVersion>
+    <Version>1.6.0</Version>
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
   </PropertyGroup>
@@ -31,7 +31,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\Dapper.Bulk.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\net6.0\Dapper.Bulk.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
