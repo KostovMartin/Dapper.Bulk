@@ -49,6 +49,11 @@ namespace Dapper.Bulk
             if (tableAttr != null)
             {
                 name = tableAttr.Name;
+
+                if (tableAttr.Schema != null)
+                {
+                    name = tableAttr.Schema  + "." + tableAttr.Name;
+                }
             }
             else
             {
