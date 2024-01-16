@@ -57,7 +57,7 @@ public static class TableMapper
         }
         else
         {
-            name = type.IsInterface && type.Name.StartsWith("I") ? type.Name[1..] : type.Name;
+            name = type.IsInterface && type.Name.StartsWith("I") ? type.Name.Substring(1) : type.Name;
             name = $"{_prefix}{name}{_suffix}";
         }
 

@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <AssemblyName>Dapper.Bulk</AssemblyName>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;</TargetFrameworks>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <NeutralLanguage>en</NeutralLanguage>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
@@ -25,6 +25,7 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
 	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
@@ -52,7 +53,7 @@
       <Pack>True</Pack>
       <PackagePath></PackagePath>
     </None>
-	<None Include="..\..\README.md" Pack="true" PackagePath="\"/>
+	  <None Include="..\..\README.md" Pack="true" PackagePath="\"/>
   </ItemGroup>
 
 </Project>

@@ -1,8 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+	<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;</TargetFrameworks>
     <RootNamespace>Dapper.Bulk</RootNamespace>
+    <LangVersion>10</LangVersion>
   </PropertyGroup>
 
   <ItemGroup>
